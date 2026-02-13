@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, NotebookPen } from "lucide-react";
 
 const STORAGE_KEY = "care:elder-info";
 
@@ -22,53 +24,78 @@ const initialData: ElderInfoData = {
   address: "Rua das Flores, 123 - São Paulo/SP",
 };
 
+const emptyData: ElderInfoData = { name: "", age: "", phone: "", sex: "", address: "" };
+
 export default function ElderInfo() {
   const [data, setData] = useState<ElderInfoData>(initialData);
+  const [form, setForm] = useState<ElderInfoData>(initialData);
+  const [open, setOpen] = useState(false);
+  const [isNew, setIsNew] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setData(JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setData(parsed);
+      setForm(parsed);
+    }
   }, []);
 
   const onSave = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setData(form);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+    setOpen(false);
+    setIsNew(false);
+  };
+
+  const openEdit = () => {
+    setIsNew(false);
+    setForm(data);
+    setOpen(true);
+  };
+
+  const openNew = () => {
+    setIsNew(true);
+    setForm(emptyData);
+    setOpen(true);
   };
 
   return (
     <div className="space-y-4 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">Dados do Idoso</h1>
-        <p className="text-muted-foreground text-sm">Cadastro com informações principais do paciente</p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Dados do Idoso</h1>
+          <p className="text-muted-foreground text-sm">Cadastro com informações principais do paciente</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button size="icon" variant="outline" aria-label="Editar dados" onClick={openEdit}><NotebookPen className="h-4 w-4" /></Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button size="icon" aria-label="Adicionar cadastro" onClick={openNew}><Plus className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{isNew ? "Novo cadastro" : "Editar cadastro"}</DialogTitle></DialogHeader>
+              <div className="space-y-3 py-2">
+                <div className="space-y-1.5"><Label>Nome do idoso</Label><Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label>Idade</Label><Input value={form.age} onChange={(e) => setForm((p) => ({ ...p, age: e.target.value }))} /></div>
+                  <div className="space-y-1.5"><Label>Sexo</Label><Input value={form.sex} onChange={(e) => setForm((p) => ({ ...p, sex: e.target.value }))} /></div>
+                </div>
+                <div className="space-y-1.5"><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} /></div>
+                <div className="space-y-1.5"><Label>Endereço</Label><Input value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} /></div>
+                <Button className="w-full" onClick={onSave}>Salvar dados</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Informações cadastrais</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Nome do idoso</Label>
-            <Input value={data.name} onChange={(e) => setData((p) => ({ ...p, name: e.target.value }))} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Idade</Label>
-              <Input value={data.age} onChange={(e) => setData((p) => ({ ...p, age: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Sexo</Label>
-              <Input value={data.sex} onChange={(e) => setData((p) => ({ ...p, sex: e.target.value }))} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Telefone</Label>
-            <Input value={data.phone} onChange={(e) => setData((p) => ({ ...p, phone: e.target.value }))} />
-          </div>
-          <div className="space-y-2">
-            <Label>Endereço</Label>
-            <Input value={data.address} onChange={(e) => setData((p) => ({ ...p, address: e.target.value }))} />
-          </div>
-          <Button className="w-full" onClick={onSave}>Salvar dados</Button>
+        <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <p><span className="font-medium">Nome:</span> {data.name || "-"}</p>
+          <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
+          <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
+          <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
+          <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
         </CardContent>
       </Card>
     </div>
