@@ -12,6 +12,7 @@ import {
   Phone,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ const navItems = [
   { to: "/perfil", icon: User, label: "Perfil" },
 ];
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -100,6 +101,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          <div className="mt-4 border-t border-border pt-4">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                setIsMenuOpen(false);
+                onLogout();
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </aside>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, NotebookPen } from "lucide-react";
+import { saveAuthProfile } from "@/lib/auth";
 
 const STORAGE_KEY = "care:elder-info";
 
@@ -14,6 +15,7 @@ type ElderInfoData = {
   phone: string;
   sex: string;
   address: string;
+  birthDate: string;
 };
 
 const initialData: ElderInfoData = {
@@ -22,9 +24,10 @@ const initialData: ElderInfoData = {
   phone: "(11) 99999-8888",
   sex: "Feminino",
   address: "Rua das Flores, 123 - São Paulo/SP",
+  birthDate: "1940-03-15",
 };
 
-const emptyData: ElderInfoData = { name: "", age: "", phone: "", sex: "", address: "" };
+const emptyData: ElderInfoData = { name: "", age: "", phone: "", sex: "", address: "", birthDate: "" };
 
 export default function ElderInfo() {
   const [data, setData] = useState<ElderInfoData>(initialData);
@@ -44,6 +47,9 @@ export default function ElderInfo() {
   const onSave = () => {
     setData(form);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+    if (form.name && form.birthDate) {
+      saveAuthProfile({ elderName: form.name, birthDate: form.birthDate });
+    }
     setOpen(false);
     setIsNew(false);
   };
@@ -80,6 +86,7 @@ export default function ElderInfo() {
                   <div className="space-y-1.5"><Label>Sexo</Label><Input value={form.sex} onChange={(e) => setForm((p) => ({ ...p, sex: e.target.value }))} /></div>
                 </div>
                 <div className="space-y-1.5"><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} /></div>
+                <div className="space-y-1.5"><Label>Data de nascimento</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm((p) => ({ ...p, birthDate: e.target.value }))} /></div>
                 <div className="space-y-1.5"><Label>Endereço</Label><Input value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} /></div>
                 <Button className="w-full" onClick={onSave}>Salvar dados</Button>
               </div>
@@ -95,6 +102,7 @@ export default function ElderInfo() {
           <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
           <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
           <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
+          <p><span className="font-medium">Data de nascimento:</span> {data.birthDate || "-"}</p>
           <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
         </CardContent>
       </Card>
