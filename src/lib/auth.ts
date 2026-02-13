@@ -8,12 +8,14 @@ export const ELDER_INFO_KEY = "care:elder-info";
 export type AuthProfile = {
   elderName: string;
   birthDate: string;
+  caregiverName?: string;
 };
 
 type AuthUser = {
   username: string;
   password: string;
   elderName: string;
+  caregiverName?: string;
 };
 
 type AuthDatabase = {
@@ -32,6 +34,25 @@ export function nameToUsername(name: string) {
   if (normalized.length === 0) return "idoso";
   if (normalized.length === 1) return normalized[0];
   return `${normalized[0]}.${normalized[normalized.length - 1]}`;
+}
+
+export function birthDateToPassword(birthDate: string) {
+  const digits = birthDate.replace(/\D/g, "");
+  if (digits.length === 8 && birthDate.includes("-")) {
+    const yyyy = digits.slice(0, 4);
+    const mm = digits.slice(4, 6);
+    const dd = digits.slice(6, 8);
+    return `${dd}${mm}${yyyy}`;
+  }
+
+  if (digits.length === 8 && birthDate.includes("/")) {
+    const dd = digits.slice(0, 2);
+    const mm = digits.slice(2, 4);
+    const yyyy = digits.slice(4, 8);
+    return `${dd}${mm}${yyyy}`;
+  }
+
+  return digits;
 }
 
 function readAuthDatabase(): AuthDatabase {
@@ -78,15 +99,15 @@ export function saveAuthProfile(profile: AuthProfile) {
 
 export function upsertUserFromProfile(profile: AuthProfile) {
   const username = nameToUsername(profile.elderName);
-  const password = profile.birthDate;
+  const password = birthDateToPassword(profile.birthDate);
 
   const db = readAuthDatabase();
   const index = db.users.findIndex((u) => u.username === username);
 
   if (index >= 0) {
-    db.users[index] = { username, password, elderName: profile.elderName };
+    db.users[index] = { username, password, elderName: profile.elderName, caregiverName: profile.caregiverName };
   } else {
-    db.users.push({ username, password, elderName: profile.elderName });
+    db.users.push({ username, password, elderName: profile.elderName, caregiverName: profile.caregiverName });
   }
 
   writeAuthDatabase(db);
@@ -109,6 +130,6 @@ export function createUser(profile: AuthProfile) {
 export function validateUserCredentials(username: string, password: string) {
   const db = readAuthDatabase();
   return db.users.some(
-    (user) => user.username === username.trim().toLowerCase() && user.password === password.trim(),
+    (user) => user.username === username.trim().toLowerCase() && user.password === password.replace(/\D/g, ""),
   );
 }

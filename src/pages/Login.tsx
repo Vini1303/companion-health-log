@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Heart } from "lucide-react";
 import {
   AuthProfile,
+  birthDateToPassword,
   createUser,
   ensureDefaultUser,
   getAuthProfile,
@@ -27,7 +28,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [error, setError] = useState("");
 
   const [signupOpen, setSignupOpen] = useState(false);
-  const [signupData, setSignupData] = useState<AuthProfile>(profile);
+  const [signupData, setSignupData] = useState<AuthProfile>({
+    elderName: profile.elderName,
+    birthDate: profile.birthDate,
+    caregiverName: profile.caregiverName || "",
+  });
 
   useEffect(() => {
     ensureDefaultUser();
@@ -43,7 +48,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   const handleCreateLogin = () => {
-    if (!signupData.elderName || !signupData.birthDate) return;
+    if (!signupData.elderName || !signupData.birthDate || !signupData.caregiverName) return;
     const created = createUser(signupData);
     setUsername(created.username);
     setPassword(created.password);
@@ -68,8 +73,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
             <div className="space-y-1.5">
               <Label>Senha</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="AAAA-MM-DD" />
-              <p className="text-xs text-muted-foreground">Senha padrão: data de nascimento do idoso (AAAA-MM-DD).</p>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="DDMMAAAA" />
+              <p className="text-xs text-muted-foreground">Senha padrão: data de nascimento em números, sem pontuação (ex: 01112003).</p>
             </div>
             {error && <p className="text-xs text-destructive">{error}</p>}
             <Button className="w-full" onClick={handleLogin}>Entrar</Button>
@@ -83,6 +88,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <DialogHeader><DialogTitle>Criar Login do Idoso</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
+              <Label>Nome do cuidador</Label>
+              <Input value={signupData.caregiverName || ""} onChange={(e) => setSignupData((p) => ({ ...p, caregiverName: e.target.value }))} placeholder="Ex: Ana Souza" />
+            </div>
+            <div className="space-y-1.5">
               <Label>Nome completo do idoso</Label>
               <Input value={signupData.elderName} onChange={(e) => setSignupData((p) => ({ ...p, elderName: e.target.value }))} placeholder="Ex: Maria da Silva" />
             </div>
@@ -92,8 +101,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
             <div className="rounded-md bg-muted p-3 text-sm">
               <p><strong>Login gerado:</strong> {nameToUsername(signupData.elderName)}</p>
-              <p><strong>Senha:</strong> {signupData.birthDate || "-"}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Esses dados serão salvos no banco local do app.</p>
+              <p><strong>Senha:</strong> {birthDateToPassword(signupData.birthDate) || "-"}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Senha no formato DDMMAAAA, sem pontuação.</p>
             </div>
             <Button className="w-full" onClick={handleCreateLogin}>Salvar Login</Button>
           </div>
