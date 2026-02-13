@@ -133,3 +133,20 @@ export function validateUserCredentials(username: string, password: string) {
     (user) => user.username === username.trim().toLowerCase() && user.password === password.replace(/\D/g, ""),
   );
 }
+
+
+export function getDashboardNames() {
+  const profile = getAuthProfile();
+
+  const caregiverName = profile.caregiverName?.trim() || "Cuidador";
+
+  const savedElder = localStorage.getItem(ELDER_INFO_KEY);
+  if (savedElder) {
+    const elder = JSON.parse(savedElder) as { name?: string };
+    if (elder.name?.trim()) {
+      return { caregiverName, patientName: elder.name.trim() };
+    }
+  }
+
+  return { caregiverName, patientName: profile.elderName || patient.name };
+}
