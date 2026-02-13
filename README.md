@@ -99,3 +99,35 @@ Para manter as próximas PRs consistentes e fáceis de revisar, este repositóri
 - `.github/pull_request_template.md`
 
 Ao abrir uma nova PR no GitHub, o conteúdo desse template será carregado automaticamente.
+
+
+## Compilação para iPhone (iOS)
+
+> Requer macOS com Xcode instalado.
+
+1. Instale dependências:
+```sh
+npm install
+```
+
+2. Gere os arquivos web:
+```sh
+npm run build
+```
+
+3. Inicialize iOS (apenas na primeira vez):
+```sh
+npm run ios:init
+```
+
+4. Sincronize o app web com o projeto iOS:
+```sh
+npm run ios:sync
+```
+
+5. Abra no Xcode para compilar/assinar:
+```sh
+npm run ios:open
+```
+
+No Xcode, selecione um simulador/dispositivo iPhone e use **Product > Archive** para gerar build de distribuição.
