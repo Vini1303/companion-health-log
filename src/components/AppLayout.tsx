@@ -8,6 +8,7 @@ import {
   Apple,
   User,
   Bell,
+  Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,8 @@ const navItems = [
   { to: "/medicamentos", icon: Pill, label: "Remédios" },
   { to: "/exames", icon: FlaskConical, label: "Exames" },
   { to: "/alergias", icon: AlertTriangle, label: "Alergias" },
+  { to: "/ligacoes", icon: Phone, label: "Ligações" },
+  { to: "/dados-idoso", icon: User, label: "Dados" },
   { to: "/nutricao", icon: Apple, label: "Nutrição" },
   { to: "/perfil", icon: User, label: "Perfil" },
 ];
@@ -41,15 +44,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto px-4 py-4 pb-24">{children}</main>
 
         <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 bg-card border-t border-border">
-          <div className="grid grid-cols-5 px-1 py-1">
-            {navItems.slice(0, 5).map((item) => {
+          <div className="flex gap-1 overflow-x-auto px-1 py-1">
+            {navItems.map((item) => {
               const isActive = location.pathname === item.to;
               return (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 rounded-md px-1 py-2 text-[11px] transition-colors",
+                    "min-w-14 flex flex-col items-center gap-0.5 rounded-md px-2 py-2 text-[11px] transition-colors",
                     isActive ? "text-primary bg-primary/10" : "text-muted-foreground",
                   )}
                 >
