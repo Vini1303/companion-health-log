@@ -1,11 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Heart } from "lucide-react";
-import { AuthProfile, getAuthProfile, nameToUsername, saveAuthProfile } from "@/lib/auth";
+import {
+  AuthProfile,
+  createUser,
+  ensureDefaultUser,
+  getAuthProfile,
+  nameToUsername,
+  validateUserCredentials,
+} from "@/lib/auth";
 
 type LoginProps = {
   onLoginSuccess: () => void;
@@ -13,8 +20,7 @@ type LoginProps = {
 
 export default function Login({ onLoginSuccess }: LoginProps) {
   const profile = useMemo(() => getAuthProfile(), []);
-  const expectedUsername = useMemo(() => nameToUsername(profile.elderName), [profile.elderName]);
-  const expectedPassword = profile.birthDate;
+  const [usernameHint, setUsernameHint] = useState(nameToUsername(profile.elderName));
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,20 +29,25 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [signupOpen, setSignupOpen] = useState(false);
   const [signupData, setSignupData] = useState<AuthProfile>(profile);
 
+  useEffect(() => {
+    ensureDefaultUser();
+  }, []);
+
   const handleLogin = () => {
-    if (username.trim().toLowerCase() === expectedUsername && password.trim() === expectedPassword) {
+    if (validateUserCredentials(username, password)) {
       onLoginSuccess();
       return;
     }
 
-    setError("Login inválido. Use nome.sobrenome e a data de nascimento (AAAA-MM-DD).");
+    setError("Login inválido. Confira usuário e senha cadastrados.");
   };
 
   const handleCreateLogin = () => {
     if (!signupData.elderName || !signupData.birthDate) return;
-    saveAuthProfile(signupData);
-    setUsername(nameToUsername(signupData.elderName));
-    setPassword(signupData.birthDate);
+    const created = createUser(signupData);
+    setUsername(created.username);
+    setPassword(created.password);
+    setUsernameHint(created.username);
     setSignupOpen(false);
     setError("");
   };
@@ -53,12 +64,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <div className="space-y-1.5">
               <Label>Login</Label>
               <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="nome.sobrenome" />
-              <p className="text-xs text-muted-foreground">Formato esperado: <strong>{expectedUsername}</strong></p>
+              <p className="text-xs text-muted-foreground">Exemplo cadastrado: <strong>{usernameHint}</strong></p>
             </div>
             <div className="space-y-1.5">
               <Label>Senha</Label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="AAAA-MM-DD" />
-              <p className="text-xs text-muted-foreground">Use a data de nascimento do idoso (AAAA-MM-DD).</p>
+              <p className="text-xs text-muted-foreground">Senha padrão: data de nascimento do idoso (AAAA-MM-DD).</p>
             </div>
             {error && <p className="text-xs text-destructive">{error}</p>}
             <Button className="w-full" onClick={handleLogin}>Entrar</Button>
@@ -82,6 +93,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <div className="rounded-md bg-muted p-3 text-sm">
               <p><strong>Login gerado:</strong> {nameToUsername(signupData.elderName)}</p>
               <p><strong>Senha:</strong> {signupData.birthDate || "-"}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Esses dados serão salvos no banco local do app.</p>
             </div>
             <Button className="w-full" onClick={handleCreateLogin}>Salvar Login</Button>
           </div>

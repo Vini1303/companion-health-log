@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, NotebookPen } from "lucide-react";
-import { saveAuthProfile } from "@/lib/auth";
+import { saveAuthProfile, upsertUserFromProfile } from "@/lib/auth";
 
 const STORAGE_KEY = "care:elder-info";
 
@@ -48,7 +48,9 @@ export default function ElderInfo() {
     setData(form);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
     if (form.name && form.birthDate) {
-      saveAuthProfile({ elderName: form.name, birthDate: form.birthDate });
+      const profile = { elderName: form.name, birthDate: form.birthDate };
+      saveAuthProfile(profile);
+      upsertUserFromProfile(profile);
     }
     setOpen(false);
     setIsNew(false);

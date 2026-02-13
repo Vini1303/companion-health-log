@@ -2,11 +2,22 @@ import { patient } from "@/lib/mock-data";
 
 export const AUTH_SESSION_KEY = "care:auth:session";
 export const AUTH_PROFILE_KEY = "care:auth:profile";
+export const AUTH_DB_KEY = "care:auth:db";
 export const ELDER_INFO_KEY = "care:elder-info";
 
 export type AuthProfile = {
   elderName: string;
   birthDate: string;
+};
+
+type AuthUser = {
+  username: string;
+  password: string;
+  elderName: string;
+};
+
+type AuthDatabase = {
+  users: AuthUser[];
 };
 
 export function nameToUsername(name: string) {
@@ -21,6 +32,16 @@ export function nameToUsername(name: string) {
   if (normalized.length === 0) return "idoso";
   if (normalized.length === 1) return normalized[0];
   return `${normalized[0]}.${normalized[normalized.length - 1]}`;
+}
+
+function readAuthDatabase(): AuthDatabase {
+  const saved = localStorage.getItem(AUTH_DB_KEY);
+  if (saved) return JSON.parse(saved) as AuthDatabase;
+  return { users: [] };
+}
+
+function writeAuthDatabase(db: AuthDatabase) {
+  localStorage.setItem(AUTH_DB_KEY, JSON.stringify(db));
 }
 
 export function getAuthProfile(): AuthProfile {
@@ -48,6 +69,46 @@ export function saveAuthProfile(profile: AuthProfile) {
   const savedElder = localStorage.getItem(ELDER_INFO_KEY);
   if (savedElder) {
     const elder = JSON.parse(savedElder) as Record<string, unknown>;
-    localStorage.setItem(ELDER_INFO_KEY, JSON.stringify({ ...elder, name: profile.elderName, birthDate: profile.birthDate }));
+    localStorage.setItem(
+      ELDER_INFO_KEY,
+      JSON.stringify({ ...elder, name: profile.elderName, birthDate: profile.birthDate }),
+    );
   }
+}
+
+export function upsertUserFromProfile(profile: AuthProfile) {
+  const username = nameToUsername(profile.elderName);
+  const password = profile.birthDate;
+
+  const db = readAuthDatabase();
+  const index = db.users.findIndex((u) => u.username === username);
+
+  if (index >= 0) {
+    db.users[index] = { username, password, elderName: profile.elderName };
+  } else {
+    db.users.push({ username, password, elderName: profile.elderName });
+  }
+
+  writeAuthDatabase(db);
+  return { username, password };
+}
+
+export function ensureDefaultUser() {
+  const profile = getAuthProfile();
+  const db = readAuthDatabase();
+  if (db.users.length === 0) {
+    upsertUserFromProfile(profile);
+  }
+}
+
+export function createUser(profile: AuthProfile) {
+  saveAuthProfile(profile);
+  return upsertUserFromProfile(profile);
+}
+
+export function validateUserCredentials(username: string, password: string) {
+  const db = readAuthDatabase();
+  return db.users.some(
+    (user) => user.username === username.trim().toLowerCase() && user.password === password.trim(),
+  );
 }
