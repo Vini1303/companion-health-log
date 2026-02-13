@@ -90,3 +90,12 @@ git add .
 git commit -m "feat: descreve a alteração"
 git push -u origin feat/minha-alteracao
 ```
+
+
+## Template de Pull Request
+
+Para manter as próximas PRs consistentes e fáceis de revisar, este repositório agora inclui um template automático em:
+
+- `.github/pull_request_template.md`
+
+Ao abrir uma nova PR no GitHub, o conteúdo desse template será carregado automaticamente.
