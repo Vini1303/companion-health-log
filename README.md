@@ -71,3 +71,22 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Fluxo recomendado para atualizar por PR
+
+Se você quiser manter as mudanças organizadas por Pull Request, pode seguir este fluxo:
+
+1. Crie uma branch de trabalho para a alteração.
+2. Faça as mudanças e execute os testes locais.
+3. Commit com uma mensagem clara sobre o que mudou.
+4. Abra uma PR para revisar e acompanhar o histórico.
+
+Exemplo rápido:
+
+```sh
+git checkout -b feat/minha-alteracao
+npm run test
+git add .
+git commit -m "feat: descreve a alteração"
+git push -u origin feat/minha-alteracao
+```
