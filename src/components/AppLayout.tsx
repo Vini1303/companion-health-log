@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -10,10 +11,10 @@ import {
   Bell,
   Phone,
   Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
@@ -29,50 +30,22 @@ const navItems = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-muted/40">
-      <div className="mx-auto min-h-screen max-w-md bg-background border-x border-border shadow-sm flex flex-col">
-        <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-card/95 backdrop-blur border-b border-border">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-auto px-2 py-1.5 text-lg font-bold text-primary flex items-center gap-2"
-                aria-label="Abrir menu lateral"
-              >
-                <Menu className="h-5 w-5" />
-                <Heart className="h-5 w-5" />
-                CuidarBem
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[88%] sm:max-w-sm px-4 py-6">
-              <SheetHeader>
-                <SheetTitle className="text-primary">Menu</SheetTitle>
-              </SheetHeader>
-
-              <nav className="mt-4 space-y-1">
-                {navItems.map((item) => {
-                  const isActive = location.pathname === item.to;
-
-                  return (
-                    <SheetClose key={item.to} asChild>
-                      <NavLink
-                        to={item.to}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
-                          isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    </SheetClose>
-                  );
-                })}
-              </nav>
-            </SheetContent>
-          </Sheet>
+      <div className="mx-auto min-h-screen max-w-md bg-background border-x border-border shadow-sm flex flex-col relative overflow-hidden">
+        <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-card/95 backdrop-blur border-b border-border">
+          <Button
+            variant="ghost"
+            className="h-auto px-2 py-1.5 text-lg font-bold text-primary flex items-center gap-2"
+            aria-label="Abrir menu lateral"
+            onClick={() => setIsMenuOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+            <Heart className="h-5 w-5" />
+            CuidarBem
+          </Button>
 
           <button className="relative p-2" aria-label="Notificações">
             <Bell className="h-5 w-5 text-muted-foreground" />
@@ -81,6 +54,53 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="flex-1 overflow-y-auto px-4 py-4">{children}</main>
+
+        <div
+          className={cn(
+            "absolute inset-0 z-40 bg-black/40 transition-opacity duration-200",
+            isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+          )}
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+
+        <aside
+          className={cn(
+            "absolute inset-y-0 left-0 z-50 w-[86%] max-w-[320px] border-r border-border bg-background p-4 shadow-xl transition-transform duration-200",
+            isMenuOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+          role="dialog"
+          aria-label="Menu lateral"
+          aria-modal="true"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-primary">Menu</h2>
+            <Button variant="ghost" size="icon" aria-label="Fechar menu" onClick={() => setIsMenuOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.to;
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                    isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
+        </aside>
       </div>
     </div>
   );
