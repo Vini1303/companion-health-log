@@ -20,9 +20,6 @@ const initialContacts: Contact[] = [
   { id: "2", name: "Polícia", number: "190", icon: "shield" },
   { id: "3", name: "Bombeiros", number: "193", icon: "flame" },
   { id: "4", name: "Ambulância Particular", number: "(11) 3000-0000", icon: "ambulance" },
-  { id: "5", name: "Filho", number: "(11) 98888-1111", icon: "user" },
-  { id: "6", name: "Marido", number: "(11) 97777-2222", icon: "user" },
-  { id: "7", name: "Neto", number: "(11) 96666-3333", icon: "user" },
 ];
 
 function IconByType({ type }: { type: Contact["icon"] }) {
