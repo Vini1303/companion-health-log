@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Pill, Plus, Clock, Check, NotebookPen } from "lucide-react";
-import { medications, medicationLog } from "@/lib/mock-data";
 
 type Medication = {
   id: string;
@@ -25,7 +24,7 @@ const emptyForm = { name: "", dosage: "", frequency: "", times: "", description:
 export default function Medications() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Medication | null>(null);
-  const [medList, setMedList] = useState<Medication[]>(medications);
+  const [medList, setMedList] = useState<Medication[]>([]);
   const [takenIds, setTakenIds] = useState<string[]>([]);
   const [form, setForm] = useState(emptyForm);
 
@@ -34,12 +33,7 @@ export default function Medications() {
     if (savedMeds) setMedList(JSON.parse(savedMeds));
 
     const savedTaken = localStorage.getItem(TAKEN_KEY);
-    if (savedTaken) {
-      setTakenIds(JSON.parse(savedTaken));
-      return;
-    }
-
-    setTakenIds(medicationLog.map((l) => l.medicationId));
+    if (savedTaken) setTakenIds(JSON.parse(savedTaken));
   }, []);
 
   useEffect(() => {
@@ -127,6 +121,7 @@ export default function Medications() {
       <Card>
         <CardHeader><CardTitle className="text-base">Agenda de Hoje</CardTitle></CardHeader>
         <CardContent className="space-y-3">
+          {medList.length === 0 && <p className="text-sm text-muted-foreground">Nenhum medicamento cadastrado.</p>}
           {medList.map((med) => {
             const taken = takenSet.has(med.id);
             return (

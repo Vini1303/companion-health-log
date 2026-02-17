@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, Plus, Calendar, User, ExternalLink, NotebookPen } from "lucide-react";
-import { exams } from "@/lib/mock-data";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -33,7 +32,7 @@ const emptyForm = { type: "", expectedDate: "", doctor: "", notes: "", resultUrl
 export default function Exams() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Exam | null>(null);
-  const [examList, setExamList] = useState<Exam[]>(exams as Exam[]);
+  const [examList, setExamList] = useState<Exam[]>([]);
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
@@ -108,6 +107,7 @@ export default function Exams() {
       </div>
 
       <div className="space-y-3">
+        {examList.length === 0 && <p className="text-sm text-muted-foreground">Nenhum exame cadastrado.</p>}
         {examList.map((exam) => {
           const status = statusMap[exam.status];
           return (

@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertTriangle, Plus, ShieldAlert, NotebookPen } from "lucide-react";
-import { allergies as mockAllergies } from "@/lib/mock-data";
 
 type Allergy = {
   id: string;
@@ -34,7 +33,7 @@ const emptyForm = { name: "", type: "medicamentosa", severity: "média", reactio
 export default function Allergies() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Allergy | null>(null);
-  const [allergies, setAllergies] = useState<Allergy[]>(mockAllergies as Allergy[]);
+  const [allergies, setAllergies] = useState<Allergy[]>([]);
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
@@ -123,6 +122,7 @@ export default function Allergies() {
       )}
 
       <div className="space-y-3">
+        {allergies.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma alergia cadastrada.</p>}
         {allergies.map((allergy) => {
           const severity = severityMap[allergy.severity];
           return (

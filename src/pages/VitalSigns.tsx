@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Activity, Droplets, Plus, NotebookPen } from "lucide-react";
-import { vitals } from "@/lib/mock-data";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,6 +21,8 @@ type VitalRecord = {
   recordedBy: string;
 };
 
+type FilterMode = "semanal" | "anual" | "data";
+
 const STORAGE_KEY = "care:vitals";
 
 function getStatusBadge(systolic: number, diastolic: number) {
@@ -35,8 +36,10 @@ const emptyForm = { systolic: "", diastolic: "", heartRate: "", temperature: "",
 export default function VitalSigns() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<VitalRecord | null>(null);
-  const [records, setRecords] = useState<VitalRecord[]>(vitals);
+  const [records, setRecords] = useState<VitalRecord[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [filterMode, setFilterMode] = useState<FilterMode>("semanal");
+  const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -47,9 +50,31 @@ export default function VitalSigns() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   }, [records]);
 
+  const filteredRecords = useMemo(() => {
+    const now = new Date();
+    const todayKey = now.toISOString().slice(0, 10);
+
+    return records.filter((record) => {
+      const recordDate = new Date(record.date);
+      if (Number.isNaN(recordDate.getTime())) return false;
+
+      if (filterMode === "semanal") {
+        const diffDays = (now.getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24);
+        return diffDays >= 0 && diffDays <= 7;
+      }
+
+      if (filterMode === "anual") {
+        return recordDate.getFullYear() === now.getFullYear();
+      }
+
+      const dateKey = selectedDate || todayKey;
+      return recordDate.toISOString().slice(0, 10) === dateKey;
+    });
+  }, [filterMode, records, selectedDate]);
+
   const chartData = useMemo(
     () =>
-      [...records]
+      [...filteredRecords]
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .map((v) => ({
           date: format(new Date(v.date), "dd/MM", { locale: ptBR }),
@@ -57,10 +82,13 @@ export default function VitalSigns() {
           diastólica: v.diastolic,
           glicemia: v.glucose,
         })),
-    [records],
+    [filteredRecords],
   );
 
-  const history = useMemo(() => [...records].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [records]);
+  const history = useMemo(
+    () => [...filteredRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [filteredRecords],
+  );
 
   const saveRecord = () => {
     if (!form.systolic || !form.diastolic || !form.heartRate || !form.temperature || !form.glucose) return;
@@ -131,34 +159,61 @@ export default function VitalSigns() {
         </div>
       </div>
 
+      <Card>
+        <CardContent className="p-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label>Período</Label>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant={filterMode === "semanal" ? "default" : "outline"} onClick={() => setFilterMode("semanal")}>Semanal</Button>
+              <Button size="sm" variant={filterMode === "anual" ? "default" : "outline"} onClick={() => setFilterMode("anual")}>Anual</Button>
+              <Button size="sm" variant={filterMode === "data" ? "default" : "outline"} onClick={() => setFilterMode("data")}>Data específica</Button>
+            </div>
+          </div>
+          {filterMode === "data" && (
+            <div className="space-y-1">
+              <Label>Escolha a data</Label>
+              <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-[200px]" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /> Pressão Arterial</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis domain={[60, 160]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="sistólica" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="diastólica" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {chartData.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum registro no período selecionado.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[60, 160]} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="sistólica" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="diastólica" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Droplets className="h-4 w-4 text-secondary" /> Glicemia</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis domain={[70, 160]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="glicemia" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {chartData.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum registro no período selecionado.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[70, 160]} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="glicemia" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -167,6 +222,7 @@ export default function VitalSigns() {
         <CardHeader><CardTitle className="text-base">Histórico de Registros</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-3">
+            {history.length === 0 && <p className="text-sm text-muted-foreground">Nenhum registro cadastrado neste período.</p>}
             {history.map((v) => (
               <div key={v.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                 <div className="text-sm"><p className="font-medium">{format(new Date(v.date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p><p className="text-xs text-muted-foreground">Por {v.recordedBy}</p></div>

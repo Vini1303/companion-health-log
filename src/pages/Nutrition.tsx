@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { nutrition } from "@/lib/mock-data";
 
 type Meal = { meal: string; time: string; description: string };
 type NutritionData = { restrictions: string[]; plan: Meal[]; notes: string };
 
 const STORAGE_KEY = "care:nutrition";
-const initialData: NutritionData = nutrition;
+const initialData: NutritionData = { restrictions: [], plan: [], notes: "" };
 
 export default function Nutrition() {
   const [data, setData] = useState<NutritionData>(initialData);
@@ -74,13 +73,14 @@ export default function Nutrition() {
       <Card className="border-warning/30 bg-warning/5">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-2"><AlertTriangle className="h-4 w-4 text-warning" /><p className="text-sm font-semibold text-warning">Restrições Alimentares</p></div>
-          <div className="flex flex-wrap gap-2">{data.restrictions.map((r, i) => (<Badge key={i} variant="outline" className="border-warning/30 text-warning">{r}</Badge>))}</div>
+          <div className="flex flex-wrap gap-2">{data.restrictions.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma restrição cadastrada.</p> : data.restrictions.map((r, i) => (<Badge key={i} variant="outline" className="border-warning/30 text-warning">{r}</Badge>))}</div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><UtensilsCrossed className="h-5 w-5 text-primary" />Plano de Refeições</CardTitle></CardHeader>
         <CardContent className="space-y-3">
+          {data.plan.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma refeição cadastrada.</p>}
           {data.plan.map((meal, i) => (
             <div key={`${meal.meal}-${meal.time}-${i}`} className="flex items-start gap-4 p-3 rounded-lg bg-muted/50">
               <div className="h-10 w-10 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0"><Apple className="h-5 w-5 text-secondary" /></div>
@@ -99,7 +99,7 @@ export default function Nutrition() {
 
       <Card>
         <CardHeader><CardTitle className="text-base">Observações Nutricionais</CardTitle></CardHeader>
-        <CardContent><p className="text-sm text-muted-foreground">{data.notes}</p></CardContent>
+        <CardContent><p className="text-sm text-muted-foreground">{data.notes || "Sem observações nutricionais."}</p></CardContent>
       </Card>
     </div>
   );
