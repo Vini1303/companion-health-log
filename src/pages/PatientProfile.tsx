@@ -2,12 +2,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Heart, Phone, Calendar, Droplets, FileText } from "lucide-react";
 import { patient } from "@/lib/mock-data";
-import { format, differenceInYears } from "date-fns";
+import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
+import { format, differenceInYears, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+type ElderInfoStored = {
+  name?: string;
+  age?: string;
+  phone?: string;
+  sex?: string;
+  address?: string;
+  birthDate?: string;
+};
+
+function getPatientViewData() {
+  const profile = getAuthProfile();
+
+  const saved = localStorage.getItem(ELDER_INFO_KEY);
+  const elderData = saved ? (JSON.parse(saved) as ElderInfoStored) : null;
+
+  const name = elderData?.name?.trim() || profile.elderName || patient.name;
+  const birthDateValue = elderData?.birthDate || profile.birthDate || patient.birthDate;
+  const birthDate = new Date(birthDateValue);
+  const validBirthDate = isValid(birthDate) ? birthDate : new Date(patient.birthDate);
+
+  const age = elderData?.age?.trim()
+    ? Number(elderData.age)
+    : differenceInYears(new Date(), validBirthDate);
+
+  const emergencyContact = elderData?.phone?.trim()
+    ? `${name} - ${elderData.phone.trim()}`
+    : patient.emergencyContact;
+
+  return {
+    name,
+    birthDate: validBirthDate,
+    age,
+    bloodType: patient.bloodType,
+    emergencyContact,
+    comorbidities: patient.comorbidities,
+    medicalHistory: patient.medicalHistory,
+  };
+}
+
 export default function PatientProfile() {
-  const birthDate = new Date(patient.birthDate);
-  const age = differenceInYears(new Date(), birthDate);
+  const patientData = getPatientViewData();
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -16,7 +55,6 @@ export default function PatientProfile() {
         <p className="text-muted-foreground text-sm">Informações gerais e médicas</p>
       </div>
 
-      {/* Basic info */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-5">
@@ -24,15 +62,15 @@ export default function PatientProfile() {
               <User className="h-10 w-10 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">{patient.name}</h2>
+              <h2 className="text-xl font-bold">{patientData.name}</h2>
               <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
-                  {format(birthDate, "dd/MM/yyyy", { locale: ptBR })} ({age} anos)
+                  {format(patientData.birthDate, "dd/MM/yyyy", { locale: ptBR })} ({patientData.age} anos)
                 </span>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Droplets className="h-3 w-3" />
-                  {patient.bloodType}
+                  {patientData.bloodType}
                 </Badge>
               </div>
             </div>
@@ -40,7 +78,6 @@ export default function PatientProfile() {
         </CardContent>
       </Card>
 
-      {/* Emergency contact */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -49,11 +86,10 @@ export default function PatientProfile() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm">{patient.emergencyContact}</p>
+          <p className="text-sm">{patientData.emergencyContact}</p>
         </CardContent>
       </Card>
 
-      {/* Comorbidities */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -63,14 +99,13 @@ export default function PatientProfile() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {patient.comorbidities.map((c, i) => (
+            {patientData.comorbidities.map((c, i) => (
               <Badge key={i} variant="secondary">{c}</Badge>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Medical history */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -79,7 +114,7 @@ export default function PatientProfile() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">{patient.medicalHistory}</p>
+          <p className="text-sm text-muted-foreground">{patientData.medicalHistory}</p>
         </CardContent>
       </Card>
     </div>
