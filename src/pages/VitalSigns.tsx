@@ -232,9 +232,13 @@ export default function VitalSigns() {
                   <div className="text-center"><p className="font-semibold">{v.heartRate}</p><p className="text-xs text-muted-foreground">bpm</p></div>
                   <div className="text-center"><p className="font-semibold">{v.temperature}°</p><p className="text-xs text-muted-foreground">°C</p></div>
                   <div className="text-center"><p className="font-semibold">{v.glucose}</p><p className="text-xs text-muted-foreground">mg/dL</p></div>
-                  <Button size="icon" variant="outline" onClick={() => openEdit(v)} aria-label="Editar registro"><NotebookPen className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="outline" onClick={() => removeRecord(v.id)} aria-label="Excluir registro"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                  {getStatusBadge(v.systolic, v.diastolic)}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      <Button size="icon" variant="outline" onClick={() => openEdit(v)} aria-label="Editar registro"><NotebookPen className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="outline" onClick={() => removeRecord(v.id)} aria-label="Excluir registro"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </div>
+                    {getStatusBadge(v.systolic, v.diastolic)}
+                  </div>
                 </div>
               </div>
             ))}
