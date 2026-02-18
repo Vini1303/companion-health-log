@@ -1,32 +1,78 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Thermometer, Droplets, Activity, Pill, AlertTriangle, Clock, ChevronRight } from "lucide-react";
-import { vitals, medications, medicationLog, allergies, notifications } from "@/lib/mock-data";
 import { getDashboardNames } from "@/lib/auth";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { Link } from "react-router-dom";
 
-const latestVital = vitals[0];
-const chartData = [...vitals].reverse().map((v) => ({
-  date: v.date.split("T")[0].slice(5),
-  sistólica: v.systolic,
-  diastólica: v.diastolic,
-  glicemia: v.glucose,
-}));
+type VitalRecord = {
+  id: string;
+  date: string;
+  systolic: number;
+  diastolic: number;
+  heartRate: number;
+  temperature: number;
+  glucose: number;
+};
 
-const takenMedIds = new Set(medicationLog.map((l) => l.medicationId));
-const pendingMeds = medications.filter((m) => !takenMedIds.has(m.id));
-const unreadNotifications = notifications.filter((n) => !n.read);
+type Medication = {
+  id: string;
+  name: string;
+  times: string[];
+};
+
+type Allergy = {
+  id: string;
+  name: string;
+  severity: "alta" | "média" | "baixa";
+};
 
 export default function Dashboard() {
   const { caregiverName, patientName } = getDashboardNames();
 
+  const vitals = useMemo(() => {
+    const saved = localStorage.getItem("care:vitals");
+    if (!saved) return [] as VitalRecord[];
+
+    const parsed = JSON.parse(saved) as VitalRecord[];
+    return [...parsed].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, []);
+
+  const medications = useMemo(() => {
+    const saved = localStorage.getItem("care:medications");
+    if (!saved) return [] as Medication[];
+    return JSON.parse(saved) as Medication[];
+  }, []);
+
+  const takenIds = useMemo(() => {
+    const saved = localStorage.getItem("care:medications:taken");
+    if (!saved) return new Set<string>();
+    return new Set(JSON.parse(saved) as string[]);
+  }, []);
+
+  const allergies = useMemo(() => {
+    const saved = localStorage.getItem("care:allergies");
+    if (!saved) return [] as Allergy[];
+    return JSON.parse(saved) as Allergy[];
+  }, []);
+
+  const latestVital = vitals[0];
+
+  const chartData = [...vitals].reverse().map((v) => ({
+    date: v.date.split("T")[0].slice(5),
+    sistólica: v.systolic,
+    diastólica: v.diastolic,
+    glicemia: v.glucose,
+  }));
+
+  const pendingMeds = medications.filter((m) => !takenIds.has(m.id));
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Bom dia, {caregiverName} 👋</h1>
-        <p className="text-muted-foreground mt-1">Resumo do cuidado de hoje — {patientName}</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Bom dia{caregiverName ? `, ${caregiverName}` : ""} 👋</h1>
+        <p className="text-muted-foreground mt-1">Resumo do cuidado de hoje{patientName ? ` — ${patientName}` : ""}</p>
       </div>
 
       {allergies.filter((a) => a.severity === "alta").length > 0 && (
@@ -50,7 +96,7 @@ export default function Dashboard() {
               <Activity className="h-4 w-4 text-primary" />
               <span className="text-xs font-medium">Pressão</span>
             </div>
-            <p className="text-xl font-bold">{latestVital.systolic}/{latestVital.diastolic}</p>
+            <p className="text-xl font-bold">{latestVital ? `${latestVital.systolic}/${latestVital.diastolic}` : ""}</p>
             <p className="text-xs text-muted-foreground">mmHg</p>
           </CardContent>
         </Card>
@@ -60,7 +106,7 @@ export default function Dashboard() {
               <Heart className="h-4 w-4 text-destructive" />
               <span className="text-xs font-medium">Freq. Cardíaca</span>
             </div>
-            <p className="text-xl font-bold">{latestVital.heartRate}</p>
+            <p className="text-xl font-bold">{latestVital?.heartRate ?? ""}</p>
             <p className="text-xs text-muted-foreground">bpm</p>
           </CardContent>
         </Card>
@@ -70,7 +116,7 @@ export default function Dashboard() {
               <Thermometer className="h-4 w-4 text-warning" />
               <span className="text-xs font-medium">Temperatura</span>
             </div>
-            <p className="text-xl font-bold">{latestVital.temperature}°</p>
+            <p className="text-xl font-bold">{latestVital ? `${latestVital.temperature}°` : ""}</p>
             <p className="text-xs text-muted-foreground">Celsius</p>
           </CardContent>
         </Card>
@@ -80,7 +126,7 @@ export default function Dashboard() {
               <Droplets className="h-4 w-4 text-secondary" />
               <span className="text-xs font-medium">Glicemia</span>
             </div>
-            <p className="text-xl font-bold">{latestVital.glucose}</p>
+            <p className="text-xl font-bold">{latestVital?.glucose ?? ""}</p>
             <p className="text-xs text-muted-foreground">mg/dL</p>
           </CardContent>
         </Card>
@@ -95,15 +141,19 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis domain={[60, 160]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="sistólica" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="diastólica" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {chartData.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum registro de pressão ainda.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={chartData}>
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[60, 160]} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="sistólica" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="diastólica" stroke="hsl(172, 66%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -115,7 +165,9 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {pendingMeds.length === 0 ? (
+            {medications.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum medicamento cadastrado.</p>
+            ) : pendingMeds.length === 0 ? (
               <p className="text-sm text-success font-medium">✓ Todos os medicamentos foram administrados!</p>
             ) : (
               pendingMeds.slice(0, 4).map((med) => (
@@ -144,15 +196,7 @@ export default function Dashboard() {
           <CardTitle className="text-base">Notificações</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {unreadNotifications.slice(0, 4).map((n) => (
-            <div key={n.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-primary" />
-                <p className="text-sm">{n.message}</p>
-              </div>
-              <Badge variant="outline" className="text-xs">{n.type === "medication" ? "Remédio" : n.type === "exam" ? "Exame" : "Vital"}</Badge>
-            </div>
-          ))}
+          <p className="text-sm text-muted-foreground">Sem notificações no momento.</p>
           <Link to="/perfil" className="inline-flex items-center gap-1 text-xs text-primary mt-2 hover:underline">
             Ver todas <ChevronRight className="h-3 w-3" />
           </Link>

@@ -1,5 +1,3 @@
-import { patient } from "@/lib/mock-data";
-
 export const AUTH_SESSION_KEY = "care:auth:session";
 export const AUTH_PROFILE_KEY = "care:auth:profile";
 export const AUTH_DB_KEY = "care:auth:db";
@@ -79,7 +77,7 @@ export function getAuthProfile(): AuthProfile {
     }
   }
 
-  const fallback = { elderName: patient.name, birthDate: patient.birthDate };
+  const fallback = { elderName: "", birthDate: "" };
   localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(fallback));
   return fallback;
 }
@@ -138,7 +136,7 @@ export function validateUserCredentials(username: string, password: string) {
 export function getDashboardNames() {
   const profile = getAuthProfile();
 
-  const caregiverName = profile.caregiverName?.trim() || "Cuidador";
+  const caregiverName = profile.caregiverName?.trim() || "";
 
   const savedElder = localStorage.getItem(ELDER_INFO_KEY);
   if (savedElder) {
@@ -148,5 +146,5 @@ export function getDashboardNames() {
     }
   }
 
-  return { caregiverName, patientName: profile.elderName || patient.name };
+  return { caregiverName, patientName: profile.elderName?.trim() || "" };
 }

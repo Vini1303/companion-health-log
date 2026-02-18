@@ -18,20 +18,11 @@ type ElderInfoData = {
   birthDate: string;
 };
 
-const initialData: ElderInfoData = {
-  name: "Maria da Silva",
-  age: "85",
-  phone: "(11) 99999-8888",
-  sex: "Feminino",
-  address: "Rua das Flores, 123 - São Paulo/SP",
-  birthDate: "1940-03-15",
-};
-
 const emptyData: ElderInfoData = { name: "", age: "", phone: "", sex: "", address: "", birthDate: "" };
 
 export default function ElderInfo() {
-  const [data, setData] = useState<ElderInfoData>(initialData);
-  const [form, setForm] = useState<ElderInfoData>(initialData);
+  const [data, setData] = useState<ElderInfoData>(emptyData);
+  const [form, setForm] = useState<ElderInfoData>(emptyData);
   const [open, setOpen] = useState(false);
   const [isNew, setIsNew] = useState(false);
 
@@ -100,12 +91,12 @@ export default function ElderInfo() {
       <Card>
         <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <p><span className="font-medium">Nome:</span> {data.name || "-"}</p>
-          <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
-          <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
-          <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
-          <p><span className="font-medium">Data de nascimento:</span> {data.birthDate || "-"}</p>
-          <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
+          <p><span className="font-medium">Nome:</span> {data.name}</p>
+          <p><span className="font-medium">Idade:</span> {data.age}</p>
+          <p><span className="font-medium">Sexo:</span> {data.sex}</p>
+          <p><span className="font-medium">Telefone:</span> {data.phone}</p>
+          <p><span className="font-medium">Data de nascimento:</span> {data.birthDate}</p>
+          <p><span className="font-medium">Endereço:</span> {data.address}</p>
         </CardContent>
       </Card>
     </div>
