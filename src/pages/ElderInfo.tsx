@@ -9,6 +9,7 @@ import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
 import { differenceInYears, isValid } from "date-fns";
 
 type ElderInfoData = {
+  schemaVersion?: number;
   name: string;
   age: string;
   sex: string;
@@ -40,14 +41,25 @@ function buildAutoData() {
   };
 }
 
+const ELDER_INFO_SCHEMA_VERSION = 2;
+
 function mergeWithAutoData(saved: Partial<ElderInfoData> | null): ElderInfoData {
   const autoData = buildAutoData();
+  const isLegacyData = !saved || !saved.schemaVersion || saved.schemaVersion < ELDER_INFO_SCHEMA_VERSION;
+
+  const manualData = isLegacyData
+    ? emptyManualData
+    : {
+        height: saved.height || "",
+        weight: saved.weight || "",
+        phone: saved.phone || "",
+        address: saved.address || "",
+      };
 
   return {
+    schemaVersion: ELDER_INFO_SCHEMA_VERSION,
     ...autoData,
-    ...emptyManualData,
-    ...(saved || {}),
-    ...autoData,
+    ...manualData,
   };
 }
 
@@ -62,11 +74,13 @@ export default function ElderInfo() {
     const merged = mergeWithAutoData(parsed);
     setData(merged);
     setForm(merged);
+    localStorage.setItem(ELDER_INFO_KEY, JSON.stringify(merged));
   }, []);
 
   const onSave = () => {
     const nextData = {
       ...data,
+      schemaVersion: ELDER_INFO_SCHEMA_VERSION,
       height: form.height,
       weight: form.weight,
       phone: form.phone,
