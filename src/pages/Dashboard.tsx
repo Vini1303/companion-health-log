@@ -28,10 +28,17 @@ type Allergy = {
   severity: "alta" | "média" | "baixa";
 };
 
+const VITALS_UPDATED_KEY = "care:vitals:updated-at";
+const MEDICATIONS_UPDATED_KEY = "care:medications:updated-at";
+const ALLERGIES_UPDATED_KEY = "care:allergies:updated-at";
+
 export default function Dashboard() {
   const { caregiverName, patientName } = getDashboardNames();
 
   const vitals = useMemo(() => {
+    const hasUserUpdates = localStorage.getItem(VITALS_UPDATED_KEY);
+    if (!hasUserUpdates) return [] as VitalRecord[];
+
     const saved = localStorage.getItem("care:vitals");
     if (!saved) return [] as VitalRecord[];
 
@@ -40,6 +47,9 @@ export default function Dashboard() {
   }, []);
 
   const medications = useMemo(() => {
+    const hasUserUpdates = localStorage.getItem(MEDICATIONS_UPDATED_KEY);
+    if (!hasUserUpdates) return [] as Medication[];
+
     const saved = localStorage.getItem("care:medications");
     if (!saved) return [] as Medication[];
     return JSON.parse(saved) as Medication[];
@@ -52,6 +62,9 @@ export default function Dashboard() {
   }, []);
 
   const allergies = useMemo(() => {
+    const hasUserUpdates = localStorage.getItem(ALLERGIES_UPDATED_KEY);
+    if (!hasUserUpdates) return [] as Allergy[];
+
     const saved = localStorage.getItem("care:allergies");
     if (!saved) return [] as Allergy[];
     return JSON.parse(saved) as Allergy[];

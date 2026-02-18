@@ -17,6 +17,7 @@ type Allergy = {
 };
 
 const STORAGE_KEY = "care:allergies";
+const UPDATED_KEY = "care:allergies:updated-at";
 const severityMap = {
   alta: { label: "Alta", className: "bg-destructive text-destructive-foreground" },
   média: { label: "Média", className: "bg-warning text-warning-foreground" },
@@ -62,6 +63,8 @@ export default function Allergies() {
     } else {
       setAllergies((prev) => [{ id: Date.now().toString(), ...payload }, ...prev]);
     }
+
+    localStorage.setItem(UPDATED_KEY, new Date().toISOString());
 
     setForm(emptyForm);
     setOpen(false);

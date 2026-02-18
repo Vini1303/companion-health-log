@@ -19,6 +19,7 @@ type Medication = {
 
 const MEDS_KEY = "care:medications";
 const TAKEN_KEY = "care:medications:taken";
+const UPDATED_KEY = "care:medications:updated-at";
 const emptyForm = { name: "", dosage: "", frequency: "", times: "", description: "" };
 
 export default function Medications() {
@@ -69,6 +70,8 @@ export default function Medications() {
       const newMed: Medication = { id: Date.now().toString(), ...payload };
       setMedList((prev) => [newMed, ...prev]);
     }
+
+    localStorage.setItem(UPDATED_KEY, new Date().toISOString());
 
     setForm(emptyForm);
     setOpen(false);

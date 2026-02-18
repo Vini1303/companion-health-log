@@ -24,6 +24,7 @@ type VitalRecord = {
 type FilterMode = "semanal" | "anual" | "data";
 
 const STORAGE_KEY = "care:vitals";
+const UPDATED_KEY = "care:vitals:updated-at";
 
 function getStatusBadge(systolic: number, diastolic: number) {
   if (systolic >= 140 || diastolic >= 90) return <Badge variant="destructive" className="text-xs">Elevada</Badge>;
@@ -109,6 +110,8 @@ export default function VitalSigns() {
       const newRecord: VitalRecord = { id: Date.now().toString(), date: new Date().toISOString(), ...payload };
       setRecords((prev) => [newRecord, ...prev]);
     }
+
+    localStorage.setItem(UPDATED_KEY, new Date().toISOString());
 
     setForm(emptyForm);
     setOpen(false);
