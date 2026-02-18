@@ -8,6 +8,7 @@ export const ELDER_INFO_KEY = "care:elder-info";
 export type AuthProfile = {
   elderName: string;
   birthDate: string;
+  sex?: string;
   caregiverName?: string;
 };
 
@@ -71,15 +72,15 @@ export function getAuthProfile(): AuthProfile {
 
   const savedElder = localStorage.getItem(ELDER_INFO_KEY);
   if (savedElder) {
-    const elder = JSON.parse(savedElder) as { name?: string; birthDate?: string };
+    const elder = JSON.parse(savedElder) as { name?: string; birthDate?: string; sex?: string };
     if (elder.name && elder.birthDate) {
-      const profile = { elderName: elder.name, birthDate: elder.birthDate };
+      const profile = { elderName: elder.name, birthDate: elder.birthDate, sex: elder.sex || "" };
       localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(profile));
       return profile;
     }
   }
 
-  const fallback = { elderName: patient.name, birthDate: patient.birthDate };
+  const fallback = { elderName: patient.name, birthDate: patient.birthDate, sex: "" };
   localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(fallback));
   return fallback;
 }
@@ -92,7 +93,7 @@ export function saveAuthProfile(profile: AuthProfile) {
     const elder = JSON.parse(savedElder) as Record<string, unknown>;
     localStorage.setItem(
       ELDER_INFO_KEY,
-      JSON.stringify({ ...elder, name: profile.elderName, birthDate: profile.birthDate }),
+      JSON.stringify({ ...elder, name: profile.elderName, birthDate: profile.birthDate, sex: profile.sex || "" }),
     );
   }
 }

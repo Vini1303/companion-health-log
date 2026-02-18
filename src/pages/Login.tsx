@@ -32,6 +32,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     elderName: profile.elderName,
     birthDate: profile.birthDate,
     caregiverName: profile.caregiverName || "",
+    sex: profile.sex || "",
   });
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   const handleCreateLogin = () => {
-    if (!signupData.elderName || !signupData.birthDate || !signupData.caregiverName) return;
+    if (!signupData.elderName || !signupData.birthDate || !signupData.caregiverName || !signupData.sex) return;
     const created = createUser(signupData);
     setUsername(created.username);
     setPassword(created.password);
@@ -98,6 +99,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <div className="space-y-1.5">
               <Label>Data de nascimento</Label>
               <Input type="date" value={signupData.birthDate} onChange={(e) => setSignupData((p) => ({ ...p, birthDate: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Sexo</Label>
+              <Input value={signupData.sex || ""} onChange={(e) => setSignupData((p) => ({ ...p, sex: e.target.value }))} placeholder="Ex: Feminino" />
             </div>
             <div className="rounded-md bg-muted p-3 text-sm">
               <p><strong>Login gerado:</strong> {nameToUsername(signupData.elderName)}</p>
