@@ -50,6 +50,20 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+
+## Preparar ambiente local (quando houver erro de dependências ausentes)
+
+Se aparecer erro como `vite: not found`, `vitest: not found` ou falha de instalação por `403`, execute:
+
+```sh
+npm run setup:env
+```
+
+Esse script:
+- valida Node/npm;
+- tenta instalar dependências com `npm install --prefer-offline --no-audit`;
+- quando o registry estiver bloqueado, mostra orientação para configurar um registry interno e repetir a instalação.
+
 ## What technologies are used for this project?
 
 This project is built with:
