@@ -1,33 +1,54 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, NotebookPen } from "lucide-react";
-import { saveAuthProfile, upsertUserFromProfile } from "@/lib/auth";
+import { Textarea } from "@/components/ui/textarea";
 
 const STORAGE_KEY = "care:elder-info";
 
+type LegacyElderInfoData = {
+  name?: string;
+  age?: string;
+  phone?: string;
+  sex?: string;
+  address?: string;
+  birthDate?: string;
+};
+
 type ElderInfoData = {
-  name: string;
-  age: string;
-  phone: string;
-  sex: string;
-  address: string;
-  birthDate: string;
+  details: string;
 };
 
 const initialData: ElderInfoData = {
-  name: "Maria da Silva",
-  age: "85",
-  phone: "(11) 99999-8888",
-  sex: "Feminino",
-  address: "Rua das Flores, 123 - São Paulo/SP",
-  birthDate: "1940-03-15",
+  details:
+    "Nome completo: Maria da Silva\nTelefone: (11) 99999-8888\nIdade: 85\nCPF: 000.000.000-00\nRG: 00.000.000-0\nAltura: 1,58 m\nPeso: 62 kg\nEndereço: Rua das Flores, 123 - São Paulo/SP\nTipo sanguíneo: O+",
 };
 
-const emptyData: ElderInfoData = { name: "", age: "", phone: "", sex: "", address: "", birthDate: "" };
+const emptyData: ElderInfoData = { details: "" };
+
+function legacyDataToText(data: LegacyElderInfoData) {
+  const lines = [
+    data.name ? `Nome completo: ${data.name}` : "",
+    data.phone ? `Telefone: ${data.phone}` : "",
+    data.age ? `Idade: ${data.age}` : "",
+    data.sex ? `Sexo: ${data.sex}` : "",
+    data.birthDate ? `Data de nascimento: ${data.birthDate}` : "",
+    data.address ? `Endereço: ${data.address}` : "",
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
+function normalizeStoredData(saved: string): ElderInfoData {
+  const parsed = JSON.parse(saved);
+
+  if (parsed && typeof parsed.details === "string") {
+    return { details: parsed.details };
+  }
+
+  return { details: legacyDataToText(parsed as LegacyElderInfoData) };
+}
 
 export default function ElderInfo() {
   const [data, setData] = useState<ElderInfoData>(initialData);
@@ -38,20 +59,15 @@ export default function ElderInfo() {
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const parsed = JSON.parse(saved);
-      setData(parsed);
-      setForm(parsed);
+      const normalized = normalizeStoredData(saved);
+      setData(normalized);
+      setForm(normalized);
     }
   }, []);
 
   const onSave = () => {
     setData(form);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-    if (form.name && form.birthDate) {
-      const profile = { elderName: form.name, birthDate: form.birthDate };
-      saveAuthProfile(profile);
-      upsertUserFromProfile(profile);
-    }
     setOpen(false);
     setIsNew(false);
   };
@@ -73,7 +89,7 @@ export default function ElderInfo() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">Dados do Idoso</h1>
-          <p className="text-muted-foreground text-sm">Cadastro com informações principais do paciente</p>
+          <p className="text-muted-foreground text-sm">Escreva os dados do idoso em um único campo (nome, telefone, idade, CPF, RG, altura, peso, endereço, tipo sanguíneo etc.)</p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="icon" variant="outline" aria-label="Editar dados" onClick={openEdit}><NotebookPen className="h-4 w-4" /></Button>
@@ -82,14 +98,12 @@ export default function ElderInfo() {
             <DialogContent>
               <DialogHeader><DialogTitle>{isNew ? "Novo cadastro" : "Editar cadastro"}</DialogTitle></DialogHeader>
               <div className="space-y-3 py-2">
-                <div className="space-y-1.5"><Label>Nome do idoso</Label><Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5"><Label>Idade</Label><Input value={form.age} onChange={(e) => setForm((p) => ({ ...p, age: e.target.value }))} /></div>
-                  <div className="space-y-1.5"><Label>Sexo</Label><Input value={form.sex} onChange={(e) => setForm((p) => ({ ...p, sex: e.target.value }))} /></div>
-                </div>
-                <div className="space-y-1.5"><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} /></div>
-                <div className="space-y-1.5"><Label>Data de nascimento</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm((p) => ({ ...p, birthDate: e.target.value }))} /></div>
-                <div className="space-y-1.5"><Label>Endereço</Label><Input value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} /></div>
+                <Textarea
+                  rows={12}
+                  value={form.details}
+                  onChange={(e) => setForm({ details: e.target.value })}
+                  placeholder="Exemplo:\nNome completo: \nTelefone: \nIdade: \nCPF: \nRG: \nAltura e Peso: \nEndereço: \nTipo sanguíneo:"
+                />
                 <Button className="w-full" onClick={onSave}>Salvar dados</Button>
               </div>
             </DialogContent>
@@ -100,12 +114,7 @@ export default function ElderInfo() {
       <Card>
         <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <p><span className="font-medium">Nome:</span> {data.name || "-"}</p>
-          <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
-          <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
-          <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
-          <p><span className="font-medium">Data de nascimento:</span> {data.birthDate || "-"}</p>
-          <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
+          <p className="whitespace-pre-line">{data.details || "-"}</p>
         </CardContent>
       </Card>
     </div>
