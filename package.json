@@ -15,7 +15,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "setup:env": "bash ./scripts/setup-environment.sh"
+    "setup:env": "bash ./scripts/setup-environment.sh",
+    "setup:env:win": "powershell -ExecutionPolicy Bypass -File ./scripts/setup-environment.ps1",
+    "verify:env": "bash ./scripts/verify-environment.sh",
+    "env:ready": "npm run setup:env && npm run verify:env"
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",

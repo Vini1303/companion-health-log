@@ -51,19 +51,46 @@ npm run dev
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 
-## Preparar ambiente local (quando houver erro de dependências ausentes)
+## Preparar ambientes para rodar tudo (dev/lint/test/build)
 
-Se aparecer erro como `vite: not found`, `vitest: not found` ou falha de instalação por `403`, execute:
+### Linux/macOS
 
 ```sh
 npm run setup:env
+npm run verify:env
 ```
 
-Esse script:
-- valida Node/npm;
-- tenta instalar dependências com `npm install --prefer-offline --no-audit`;
-- quando o registry estiver bloqueado, mostra orientação para configurar um registry interno e repetir a instalação.
+### Windows (PowerShell)
 
+```powershell
+npm run setup:env:win
+npm run verify:env
+```
+
+### Fluxo único (Linux/macOS)
+
+```sh
+npm run env:ready
+```
+
+Os scripts fazem:
+- validação de `node` e `npm`;
+- instalação de dependências (com fallback de instalação);
+- checagem de binários locais (`vite`, `vitest`, `eslint`);
+- validação completa com `lint`, `test` e `build`.
+
+Se sua rede exigir registry interno, configure antes de rodar:
+
+```sh
+NPM_REGISTRY_URL=<URL_DO_REGISTRY_INTERNO> npm run setup:env
+```
+
+No PowerShell:
+
+```powershell
+$env:NPM_REGISTRY_URL="<URL_DO_REGISTRY_INTERNO>"
+npm run setup:env:win
+```
 
 ### Erro `ENOENT` (package.json não encontrado)
 
