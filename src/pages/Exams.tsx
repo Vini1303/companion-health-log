@@ -86,12 +86,6 @@ export default function Exams() {
           <p className="text-muted-foreground text-sm">Solicitações, resultados e links para laudos</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="outline" aria-label="Editar exame" onClick={() => examList[0] && openEdit(examList[0])}>
-            <NotebookPen className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" aria-label="Excluir exame" onClick={() => examList[0] && removeExam(examList[0].id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="icon" aria-label="Adicionar exame"><Plus className="h-4 w-4" /></Button>

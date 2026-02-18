@@ -66,8 +66,6 @@ export default function Nutrition() {
           <p className="text-muted-foreground text-sm">Plano alimentar e restrições</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="outline" aria-label="Editar refeição" onClick={() => data.plan[0] && openEdit(data.plan[0])}><NotebookPen className="h-4 w-4" /></Button>
-          <Button size="icon" variant="outline" aria-label="Excluir refeição" onClick={() => data.plan[0] && removeMeal(data.plan[0])}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button size="icon" aria-label="Adicionar refeição"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>

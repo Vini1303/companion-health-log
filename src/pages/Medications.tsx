@@ -100,12 +100,6 @@ export default function Medications() {
           <p className="text-muted-foreground text-sm">Horários, dosagens e confirmação do que já foi administrado</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="outline" aria-label="Editar medicamento" onClick={() => medList[0] && openEdit(medList[0])}>
-            <NotebookPen className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" aria-label="Excluir medicamento" onClick={() => medList[0] && removeMedication(medList[0].id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="icon" aria-label="Adicionar medicamento"><Plus className="h-4 w-4" /></Button>

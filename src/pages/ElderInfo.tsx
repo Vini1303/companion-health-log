@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { NotebookPen, Trash2 } from "lucide-react";
 import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
 import { differenceInYears, isValid } from "date-fns";
 
@@ -98,20 +97,6 @@ export default function ElderInfo() {
     setOpen(true);
   };
 
-  const clearManualFields = () => {
-    const nextData = {
-      ...data,
-      height: "",
-      weight: "",
-      phone: "",
-      address: "",
-    };
-
-    setData(nextData);
-    setForm(nextData);
-    localStorage.setItem(ELDER_INFO_KEY, JSON.stringify(nextData));
-  };
-
   return (
     <div className="space-y-4 max-w-5xl">
       <div className="flex items-center justify-between gap-2">
@@ -121,8 +106,8 @@ export default function ElderInfo() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" variant="outline" aria-label="Editar dados" onClick={openEdit}>
-              <NotebookPen className="h-4 w-4" />
+            <Button variant="outline" onClick={openEdit}>
+              Atualizar dados
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -140,9 +125,6 @@ export default function ElderInfo() {
             </div>
           </DialogContent>
         </Dialog>
-        <Button size="icon" variant="outline" aria-label="Excluir dados manuais" onClick={clearManualFields}>
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
       </div>
 
       <Card>

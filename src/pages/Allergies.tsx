@@ -91,12 +91,6 @@ export default function Allergies() {
           <p className="text-muted-foreground text-sm">Registro de alergias conhecidas</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="outline" aria-label="Editar alergia" onClick={() => allergies[0] && openEdit(allergies[0])}>
-            <NotebookPen className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" aria-label="Excluir alergia" onClick={() => allergies[0] && removeAllergy(allergies[0].id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button size="icon" aria-label="Adicionar alergia"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>
