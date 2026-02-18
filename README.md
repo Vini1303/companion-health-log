@@ -71,3 +71,85 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Fluxo recomendado para atualizar por PR
+
+Se você quiser manter as mudanças organizadas por Pull Request, pode seguir este fluxo:
+
+1. Crie uma branch de trabalho para a alteração.
+2. Faça as mudanças e execute os testes locais.
+3. Commit com uma mensagem clara sobre o que mudou.
+4. Abra uma PR para revisar e acompanhar o histórico.
+
+Exemplo rápido:
+
+```sh
+git checkout -b feat/minha-alteracao
+npm run test
+git add .
+git commit -m "feat: descreve a alteração"
+git push -u origin feat/minha-alteracao
+```
+
+
+## Template de Pull Request
+
+Para manter as próximas PRs consistentes e fáceis de revisar, este repositório agora inclui um template automático em:
+
+- `.github/pull_request_template.md`
+
+Ao abrir uma nova PR no GitHub, o conteúdo desse template será carregado automaticamente.
+
+
+## Compilação para iPhone (iOS)
+
+> Requer macOS com Xcode instalado.
+
+1. Instale dependências:
+```sh
+npm install
+```
+
+2. Gere os arquivos web:
+```sh
+npm run build
+```
+
+3. Inicialize iOS (apenas na primeira vez):
+```sh
+npm run ios:init
+```
+
+4. Sincronize o app web com o projeto iOS:
+```sh
+npm run ios:sync
+```
+
+5. Abra no Xcode para compilar/assinar:
+```sh
+npm run ios:open
+```
+
+No Xcode, selecione um simulador/dispositivo iPhone e use **Product > Archive** para gerar build de distribuição.
+
+
+## Instalar no iPhone 14 Pro Max (sem Xcode no seu iPhone)
+
+Sim, é possível usar no seu iPhone 14 Pro Max, mas com duas opções:
+
+1. **Como app instalado (recomendado)** via **TestFlight**
+   - Você precisa compilar em um Mac com Xcode **ou** usar um serviço de build em nuvem (ex.: Codemagic / Appflow).
+   - Fluxo resumido:
+     1. `npm install`
+     2. `npm run ios:init`
+     3. `npm run ios:sync`
+     4. Compilar/assinar no Xcode (ou pipeline cloud)
+     5. Enviar para TestFlight
+     6. Instalar no iPhone pelo app TestFlight.
+
+2. **Como atalho na Tela de Início (sem app nativo)**
+   - Publique/rode o app web e abra no Safari do iPhone.
+   - Toque em **Compartilhar > Adicionar à Tela de Início**.
+   - Funciona como “app”, mas não é um binário nativo da App Store.
+
+> Importante: não existe instalação de `.ipa` diretamente no iPhone sem assinatura Apple. Para app nativo, use TestFlight/App Store ou distribuição corporativa.

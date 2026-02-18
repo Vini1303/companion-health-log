@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Thermometer, Droplets, Activity, Pill, AlertTriangle, Clock, ChevronRight } from "lucide-react";
 import { vitals, medications, medicationLog, allergies, notifications } from "@/lib/mock-data";
+import { getDashboardNames } from "@/lib/auth";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { Link } from "react-router-dom";
 
@@ -19,14 +20,15 @@ const pendingMeds = medications.filter((m) => !takenMedIds.has(m.id));
 const unreadNotifications = notifications.filter((n) => !n.read);
 
 export default function Dashboard() {
+  const { caregiverName, patientName } = getDashboardNames();
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Bom dia, Ana 👋</h1>
-        <p className="text-muted-foreground mt-1">Resumo do cuidado de hoje — Maria da Silva</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Bom dia, {caregiverName} 👋</h1>
+        <p className="text-muted-foreground mt-1">Resumo do cuidado de hoje — {patientName}</p>
       </div>
 
-      {/* Alerts */}
       {allergies.filter((a) => a.severity === "alta").length > 0 && (
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="p-4 flex items-center gap-3">
@@ -41,7 +43,6 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Vital signs summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card>
           <CardContent className="p-4">
@@ -86,7 +87,6 @@ export default function Dashboard() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Vitals chart */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -107,7 +107,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Pending medications */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -128,14 +127,11 @@ export default function Dashboard() {
                     <div>
                       <p className="text-sm font-medium">{med.name}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {med.times.join(", ")}
+                        <Clock className="h-3 w-3" /> {med.times[0]}
                       </p>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" className="text-xs h-8">
-                    Marcar
-                  </Button>
+                  <Button size="sm" variant="outline">Marcar</Button>
                 </div>
               ))
             )}
@@ -143,25 +139,25 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Notifications */}
-      {unreadNotifications.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Notificações</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {unreadNotifications.map((n) => (
-              <div key={n.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
-                <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                <p className="text-sm flex-1">{n.message}</p>
-                <Badge variant="outline" className="text-xs">
-                  {n.type === "medication" ? "Remédio" : n.type === "exam" ? "Exame" : "Vital"}
-                </Badge>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Notificações</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {unreadNotifications.slice(0, 4).map((n) => (
+            <div key={n.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <p className="text-sm">{n.message}</p>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+              <Badge variant="outline" className="text-xs">{n.type === "medication" ? "Remédio" : n.type === "exam" ? "Exame" : "Vital"}</Badge>
+            </div>
+          ))}
+          <Link to="/perfil" className="inline-flex items-center gap-1 text-xs text-primary mt-2 hover:underline">
+            Ver todas <ChevronRight className="h-3 w-3" />
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
