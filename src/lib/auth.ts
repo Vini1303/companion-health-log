@@ -139,7 +139,7 @@ export function validateUserCredentials(username: string, password: string) {
 export function getDashboardNames() {
   const profile = getAuthProfile();
 
-  const caregiverName = profile.caregiverName?.trim() || "Cuidador";
+  const caregiverName = profile.caregiverName?.trim() || "Não cadastrado";
 
   const savedElder = localStorage.getItem(ELDER_INFO_KEY);
   if (savedElder) {
@@ -149,5 +149,5 @@ export function getDashboardNames() {
     }
   }
 
-  return { caregiverName, patientName: profile.elderName || patient.name };
+  return { caregiverName, patientName: profile.elderName?.trim() || "Não cadastrado" };
 }
