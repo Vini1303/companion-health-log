@@ -3,8 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Plus, Trash2 } from "lucide-react";
+import { Heart, Plus } from "lucide-react";
 import { COMORBIDITIES_STORAGE_KEY } from "@/lib/storage-keys";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 export default function Comorbidities() {
   const [comorbidities, setComorbidities] = useState<string[]>([]);
@@ -78,19 +79,18 @@ export default function Comorbidities() {
         )}
 
         {comorbidities.map((item) => (
-          <Card key={item}>
-            <CardContent className="p-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Heart className="h-4 w-4 text-primary" />
+          <SwipeToDeleteItem key={item} onDelete={() => removeComorbidity(item)} deleteLabel={`Apagar ${item}`}>
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Heart className="h-4 w-4 text-primary" />
+                  </div>
+                  <Badge variant="secondary">{item}</Badge>
                 </div>
-                <Badge variant="secondary">{item}</Badge>
-              </div>
-              <Button variant="outline" size="icon" aria-label={`Remover ${item}`} onClick={() => removeComorbidity(item)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </SwipeToDeleteItem>
         ))}
       </div>
     </div>

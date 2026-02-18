@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, Plus, Calendar, User, ExternalLink, NotebookPen } from "lucide-react";
 import { format } from "date-fns";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 import { ptBR } from "date-fns/locale";
 
 type Exam = {
@@ -74,6 +75,10 @@ export default function Exams() {
     setOpen(true);
   };
 
+  const removeExam = (examId: string) => {
+    setExamList((prev) => prev.filter((exam) => exam.id !== examId));
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between gap-2">
@@ -111,8 +116,9 @@ export default function Exams() {
         {examList.map((exam) => {
           const status = statusMap[exam.status];
           return (
-            <Card key={exam.id}>
-              <CardContent className="p-4">
+            <SwipeToDeleteItem key={exam.id} onDelete={() => removeExam(exam.id)} deleteLabel={`Apagar exame ${exam.type}`}>
+              <Card>
+                <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center"><FlaskConical className="h-5 w-5 text-accent" /></div>
@@ -135,8 +141,9 @@ export default function Exams() {
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </SwipeToDeleteItem>
           );
         })}
       </div>

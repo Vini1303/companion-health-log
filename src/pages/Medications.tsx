@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Pill, Plus, Clock, Check, NotebookPen } from "lucide-react";
 import { MEDICATIONS_STORAGE_KEY } from "@/lib/storage-keys";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Medication = {
   id: string;
@@ -49,6 +50,11 @@ export default function Medications() {
 
   const toggleTaken = (medId: string) => {
     setTakenIds((prev) => (prev.includes(medId) ? prev.filter((id) => id !== medId) : [...prev, medId]));
+  };
+
+  const removeMedication = (medId: string) => {
+    setMedList((prev) => prev.filter((med) => med.id !== medId));
+    setTakenIds((prev) => prev.filter((id) => id !== medId));
   };
 
   const saveMedication = () => {
@@ -126,7 +132,8 @@ export default function Medications() {
           {medList.map((med) => {
             const taken = takenSet.has(med.id);
             return (
-              <div key={med.id} className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${taken ? "bg-success/5 border-success/20" : "bg-card border-border"}`}>
+              <SwipeToDeleteItem key={med.id} onDelete={() => removeMedication(med.id)} deleteLabel={`Apagar ${med.name}`}>
+                <div className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${taken ? "bg-success/5 border-success/20" : "bg-card border-border"}`}>
                 <div className="flex items-center gap-4">
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${taken ? "bg-success/10" : "bg-primary/10"}`}>
                     {taken ? <Check className="h-5 w-5 text-success" /> : <Pill className="h-5 w-5 text-primary" />}
@@ -145,6 +152,7 @@ export default function Medications() {
                   <Button size="sm" variant={taken ? "outline" : "default"} className={!taken ? "bg-success hover:bg-success/90 text-success-foreground" : ""} onClick={() => toggleTaken(med.id)}><Check className="h-4 w-4" /></Button>
                 </div>
               </div>
+            </SwipeToDeleteItem>
             );
           })}
         </CardContent>

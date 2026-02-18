@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertTriangle, Plus, ShieldAlert, NotebookPen } from "lucide-react";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Allergy = {
   id: string;
@@ -79,6 +80,10 @@ export default function Allergies() {
     setOpen(true);
   };
 
+  const removeAllergy = (allergyId: string) => {
+    setAllergies((prev) => prev.filter((allergy) => allergy.id !== allergyId));
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between gap-2">
@@ -126,8 +131,9 @@ export default function Allergies() {
         {allergies.map((allergy) => {
           const severity = severityMap[allergy.severity];
           return (
-            <Card key={allergy.id} className={allergy.severity === "alta" ? "border-destructive/20" : ""}>
-              <CardContent className="p-4">
+            <SwipeToDeleteItem key={allergy.id} onDelete={() => removeAllergy(allergy.id)} deleteLabel={`Apagar alergia ${allergy.name}`}>
+              <Card className={allergy.severity === "alta" ? "border-destructive/20" : ""}>
+                <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${allergy.severity === "alta" ? "bg-destructive/10" : "bg-warning/10"}`}>
@@ -147,8 +153,9 @@ export default function Allergies() {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </SwipeToDeleteItem>
           );
         })}
       </div>

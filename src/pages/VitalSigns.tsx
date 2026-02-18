@@ -9,6 +9,7 @@ import { Activity, Droplets, Plus, NotebookPen } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type VitalRecord = {
   id: string;
@@ -127,6 +128,10 @@ export default function VitalSigns() {
     setOpen(true);
   };
 
+  const removeRecord = (recordId: string) => {
+    setRecords((prev) => prev.filter((record) => record.id !== recordId));
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between gap-2">
@@ -224,7 +229,8 @@ export default function VitalSigns() {
           <div className="space-y-3">
             {history.length === 0 && <p className="text-sm text-muted-foreground">Nenhum registro cadastrado neste período.</p>}
             {history.map((v) => (
-              <div key={v.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <SwipeToDeleteItem key={v.id} onDelete={() => removeRecord(v.id)} deleteLabel="Apagar registro de sinais vitais">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                 <div className="text-sm"><p className="font-medium">{format(new Date(v.date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p><p className="text-xs text-muted-foreground">Por {v.recordedBy}</p></div>
                 <div className="flex items-center gap-3 text-sm">
                   <div className="text-center"><p className="font-semibold">{v.systolic}/{v.diastolic}</p><p className="text-xs text-muted-foreground">mmHg</p></div>
@@ -235,6 +241,7 @@ export default function VitalSigns() {
                   {getStatusBadge(v.systolic, v.diastolic)}
                 </div>
               </div>
+            </SwipeToDeleteItem>
             ))}
           </div>
         </CardContent>

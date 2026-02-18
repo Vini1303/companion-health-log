@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { NotebookPen } from "lucide-react";
 import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
 import { differenceInYears, isValid } from "date-fns";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type ElderInfoData = {
   schemaVersion?: number;
@@ -98,6 +99,20 @@ export default function ElderInfo() {
     setOpen(true);
   };
 
+  const clearManualFields = () => {
+    const nextData = {
+      ...data,
+      height: "",
+      weight: "",
+      phone: "",
+      address: "",
+    };
+
+    setData(nextData);
+    setForm(nextData);
+    localStorage.setItem(ELDER_INFO_KEY, JSON.stringify(nextData));
+  };
+
   return (
     <div className="space-y-4 max-w-5xl">
       <div className="flex items-center justify-between gap-2">
@@ -128,9 +143,10 @@ export default function ElderInfo() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
-        <CardContent className="space-y-3 text-sm">
+      <SwipeToDeleteItem onDelete={clearManualFields} deleteLabel="Limpar dados manuais do idoso">
+        <Card>
+          <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-sm">
           <p><span className="font-medium">Nome:</span> {data.name || "-"}</p>
           <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
           <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
@@ -139,8 +155,9 @@ export default function ElderInfo() {
           <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
           <p><span className="font-medium">Data de nascimento:</span> {data.birthDate || "-"}</p>
           <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </SwipeToDeleteItem>
     </div>
   );
 }

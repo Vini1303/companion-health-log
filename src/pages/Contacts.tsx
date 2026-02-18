@@ -5,6 +5,7 @@ import { Phone, Ambulance, Shield, Flame, UserRound, Plus, NotebookPen } from "l
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Contact = {
   id: string;
@@ -79,6 +80,14 @@ export default function Contacts() {
     setForm({ name: "", number: "" });
   };
 
+  const removeContact = (contactId: string) => {
+    setContacts((prev) => prev.filter((contact) => contact.id !== contactId));
+    if (editing?.id === contactId) {
+      setEditing(null);
+      setForm({ name: "", number: "" });
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-5xl">
       <div className="flex items-start justify-between gap-3">
@@ -126,8 +135,9 @@ export default function Contacts() {
 
       <div className="space-y-3">
         {filtered.map((contact) => (
-          <Card key={contact.id}>
-            <CardContent className="p-4 flex items-center justify-between gap-2">
+          <SwipeToDeleteItem key={contact.id} onDelete={() => removeContact(contact.id)} deleteLabel={`Apagar contato ${contact.name}`}>
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <IconByType type={contact.icon} />
@@ -156,8 +166,9 @@ export default function Contacts() {
                   <Phone className="h-4 w-4" /> Ligar
                 </a>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </SwipeToDeleteItem>
         ))}
       </div>
 
