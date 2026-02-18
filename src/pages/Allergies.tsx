@@ -14,6 +14,7 @@ type Allergy = {
   severity: "alta" | "média" | "baixa";
   reaction: string;
   notes?: string;
+  userCreated?: boolean;
 };
 
 const STORAGE_KEY = "care:allergies";
@@ -55,6 +56,7 @@ export default function Allergies() {
       severity: form.severity as Allergy["severity"],
       reaction: form.reaction,
       notes: form.notes,
+      userCreated: true,
     };
 
     if (editing) {

@@ -19,6 +19,7 @@ type VitalRecord = {
   temperature: number;
   glucose: number;
   recordedBy: string;
+  userCreated?: boolean;
 };
 
 type FilterMode = "semanal" | "anual" | "data";
@@ -101,6 +102,7 @@ export default function VitalSigns() {
       temperature: Number(form.temperature),
       glucose: Number(form.glucose),
       recordedBy: form.recordedBy || "Equipe",
+      userCreated: true,
     };
 
     if (editing) {

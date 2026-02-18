@@ -14,18 +14,21 @@ type VitalRecord = {
   heartRate: number;
   temperature: number;
   glucose: number;
+  userCreated?: boolean;
 };
 
 type Medication = {
   id: string;
   name: string;
   times: string[];
+  userCreated?: boolean;
 };
 
 type Allergy = {
   id: string;
   name: string;
   severity: "alta" | "média" | "baixa";
+  userCreated?: boolean;
 };
 
 const VITALS_UPDATED_KEY = "care:vitals:updated-at";
@@ -43,7 +46,9 @@ export default function Dashboard() {
     if (!saved) return [] as VitalRecord[];
 
     const parsed = JSON.parse(saved) as VitalRecord[];
-    return [...parsed].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...parsed]
+      .filter((record) => record.userCreated)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, []);
 
   const medications = useMemo(() => {
@@ -52,7 +57,8 @@ export default function Dashboard() {
 
     const saved = localStorage.getItem("care:medications");
     if (!saved) return [] as Medication[];
-    return JSON.parse(saved) as Medication[];
+    const parsed = JSON.parse(saved) as Medication[];
+    return parsed.filter((medication) => medication.userCreated);
   }, []);
 
   const takenIds = useMemo(() => {
@@ -67,7 +73,8 @@ export default function Dashboard() {
 
     const saved = localStorage.getItem("care:allergies");
     if (!saved) return [] as Allergy[];
-    return JSON.parse(saved) as Allergy[];
+    const parsed = JSON.parse(saved) as Allergy[];
+    return parsed.filter((allergy) => allergy.userCreated);
   }, []);
 
   const latestVital = vitals[0];

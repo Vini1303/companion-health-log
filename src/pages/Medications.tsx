@@ -15,6 +15,7 @@ type Medication = {
   times: string[];
   description: string;
   active: boolean;
+  userCreated?: boolean;
 };
 
 const MEDS_KEY = "care:medications";
@@ -61,6 +62,7 @@ export default function Medications() {
       times: form.times.split(",").map((t) => t.trim()).filter(Boolean),
       description: form.description || "Sem descrição",
       active: true,
+      userCreated: true,
     };
 
     if (editing) {
