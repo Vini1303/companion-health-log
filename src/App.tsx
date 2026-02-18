@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import VitalSigns from "@/pages/VitalSigns";
@@ -19,6 +19,19 @@ import NotFound from "@/pages/NotFound";
 import { AUTH_SESSION_KEY } from "@/lib/auth";
 
 const queryClient = new QueryClient();
+
+type ProtectedRouteProps = {
+  isAuthenticated: boolean;
+  children: React.ReactNode;
+};
+
+function ProtectedRoute({ isAuthenticated, children }: ProtectedRouteProps) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,26 +56,105 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {isAuthenticated ? (
-          <BrowserRouter>
-            <AppLayout onLogout={handleLogout}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/sinais-vitais" element={<VitalSigns />} />
-                <Route path="/medicamentos" element={<Medications />} />
-                <Route path="/exames" element={<Exams />} />
-                <Route path="/alergias" element={<Allergies />} />
-                <Route path="/ligacoes" element={<Contacts />} />
-                <Route path="/dados-idoso" element={<ElderInfo />} />
-                <Route path="/nutricao" element={<Nutrition />} />
-                <Route path="/perfil" element={<PatientProfile />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AppLayout>
-          </BrowserRouter>
-        ) : (
-          <Login onLoginSuccess={handleLogin} />
-        )}
+        <BrowserRouter>
+          <Routes>
+            <Route
+              path="/login"
+              element={isAuthenticated ? <Navigate to="/dados-idoso" replace /> : <Login onLoginSuccess={handleLogin} />}
+            />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Dashboard />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sinais-vitais"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <VitalSigns />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicamentos"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Medications />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/exames"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Exams />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/alergias"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Allergies />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ligacoes"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Contacts />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dados-idoso"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <ElderInfo />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nutricao"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <Nutrition />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/perfil"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <AppLayout onLogout={handleLogout}>
+                    <PatientProfile />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={isAuthenticated ? <NotFound /> : <Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
