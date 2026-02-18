@@ -10,6 +10,7 @@ import VitalSigns from "@/pages/VitalSigns";
 import Medications from "@/pages/Medications";
 import Exams from "@/pages/Exams";
 import Allergies from "@/pages/Allergies";
+import Comorbidities from "@/pages/Comorbidities";
 import Nutrition from "@/pages/Nutrition";
 import PatientProfile from "@/pages/PatientProfile";
 import Contacts from "@/pages/Contacts";
@@ -52,6 +53,7 @@ const App = () => {
                 <Route path="/medicamentos" element={<Medications />} />
                 <Route path="/exames" element={<Exams />} />
                 <Route path="/alergias" element={<Allergies />} />
+                <Route path="/comorbidades" element={<Comorbidities />} />
                 <Route path="/ligacoes" element={<Contacts />} />
                 <Route path="/dados-idoso" element={<ElderInfo />} />
                 <Route path="/nutricao" element={<Nutrition />} />

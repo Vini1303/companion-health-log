@@ -4,6 +4,7 @@ import { User, Heart, Calendar, Droplets, FileText } from "lucide-react";
 import { patient } from "@/lib/mock-data";
 import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
 import { format, differenceInYears, isValid } from "date-fns";
+import { COMORBIDITIES_STORAGE_KEY } from "@/lib/storage-keys";
 import { ptBR } from "date-fns/locale";
 
 type ElderInfoStored = {
@@ -28,12 +29,15 @@ function getPatientViewData() {
 
   const age = elderData?.age?.trim() ? Number(elderData.age) : differenceInYears(new Date(), validBirthDate);
 
+  const savedComorbidities = localStorage.getItem(COMORBIDITIES_STORAGE_KEY);
+  const comorbidities = savedComorbidities ? (JSON.parse(savedComorbidities) as string[]) : [];
+
   return {
     name,
     birthDate: validBirthDate,
     age,
     bloodType: patient.bloodType,
-    comorbidities: patient.comorbidities,
+    comorbidities,
     medicalHistory: patient.medicalHistory,
   };
 }
@@ -79,13 +83,17 @@ export default function PatientProfile() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {patientData.comorbidities.map((c, i) => (
-              <Badge key={i} variant="secondary">
-                {c}
-              </Badge>
-            ))}
-          </div>
+          {patientData.comorbidities.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma comorbidade cadastrada.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {patientData.comorbidities.map((c, i) => (
+                <Badge key={i} variant="secondary">
+                  {c}
+                </Badge>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
