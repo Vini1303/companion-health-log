@@ -50,6 +50,54 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+
+## Preparar ambiente local (quando houver erro de dependências ausentes)
+
+Se aparecer erro como `vite: not found`, `vitest: not found` ou falha de instalação por `403`, execute:
+
+```sh
+npm run setup:env
+```
+
+Esse script:
+- valida Node/npm;
+- tenta instalar dependências com `npm install --prefer-offline --no-audit`;
+- quando o registry estiver bloqueado, mostra orientação para configurar um registry interno e repetir a instalação.
+
+
+### Erro `ENOENT` (package.json não encontrado)
+
+Se aparecer algo como:
+
+```
+npm error enoent Could not read package.json
+```
+
+você está executando o comando na pasta errada. O `npm run dev` só funciona na pasta do projeto (onde existe `package.json`).
+
+**PowerShell (Windows):**
+
+```powershell
+# 1) entre na pasta correta do projeto
+cd C:\Users\vinicius.mesquita\Desktop\sistema2\companion-health-log
+
+# 2) confirme se existe package.json
+dir package.json
+
+# 3) instale dependências e rode
+npm install
+npm run dev
+```
+
+Se você não tiver o repositório ainda nessa pasta, clone primeiro e depois entre nele:
+
+```powershell
+git clone <URL_DO_REPOSITORIO>
+cd companion-health-log
+npm install
+npm run dev
+```
+
 ## What technologies are used for this project?
 
 This project is built with:

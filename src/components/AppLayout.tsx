@@ -23,6 +23,7 @@ const navItems = [
   { to: "/medicamentos", icon: Pill, label: "Medicamentos" },
   { to: "/exames", icon: FlaskConical, label: "Exames" },
   { to: "/alergias", icon: AlertTriangle, label: "Alergias" },
+  { to: "/comorbidades", icon: Heart, label: "Comorbidades" },
   { to: "/ligacoes", icon: Phone, label: "Ligações" },
   { to: "/dados-idoso", icon: User, label: "Dados do Idoso" },
   { to: "/nutricao", icon: Apple, label: "Nutrição" },
