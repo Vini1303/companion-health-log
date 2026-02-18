@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Pill, Plus, Clock, Check, NotebookPen } from "lucide-react";
+import { MEDICATIONS_STORAGE_KEY } from "@/lib/storage-keys";
 
 type Medication = {
   id: string;
@@ -17,7 +18,7 @@ type Medication = {
   active: boolean;
 };
 
-const MEDS_KEY = "care:medications";
+const MEDS_KEY = MEDICATIONS_STORAGE_KEY;
 const TAKEN_KEY = "care:medications:taken";
 const emptyForm = { name: "", dosage: "", frequency: "", times: "", description: "" };
 

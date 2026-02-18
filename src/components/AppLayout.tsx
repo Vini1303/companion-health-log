@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMedicationNotifications } from "@/hooks/use-medication-notifications";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
@@ -30,9 +33,21 @@ const navItems = [
   { to: "/perfil", icon: User, label: "Perfil" },
 ];
 
+const notificationDateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
 export function AppLayout({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { notifications, unreadCount, markAllAsRead } = useMedicationNotifications();
+
+  const sortedNotifications = useMemo(
+    () => [...notifications].sort((a, b) => new Date(b.alertedAt).getTime() - new Date(a.alertedAt).getTime()),
+    [notifications],
+  );
 
   return (
     <div className="min-h-screen bg-muted/40">
@@ -49,10 +64,49 @@ export function AppLayout({ children, onLogout }: { children: React.ReactNode; o
             CuidarBem
           </Button>
 
-          <button className="relative p-2" aria-label="Notificações">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
-          </button>
+          <Popover
+            open={isNotificationsOpen}
+            onOpenChange={(open) => {
+              setIsNotificationsOpen(open);
+              if (open) markAllAsRead();
+            }}
+          >
+            <PopoverTrigger asChild>
+              <button className="relative p-2" aria-label="Notificações">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                {unreadCount > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 p-0">
+              <div className="border-b border-border px-4 py-3">
+                <p className="text-sm font-semibold">Notificações de medicamentos</p>
+                <p className="text-xs text-muted-foreground">Alertas enviados e os dias em que ocorreram.</p>
+              </div>
+              <ScrollArea className="max-h-80">
+                <div className="space-y-2 p-3">
+                  {sortedNotifications.length === 0 && (
+                    <p className="text-sm text-muted-foreground px-1 py-2">Nenhuma notificação até agora.</p>
+                  )}
+
+                  {sortedNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={cn(
+                        "rounded-md border p-3",
+                        notification.read ? "border-border bg-card" : "border-destructive/30 bg-destructive/5",
+                      )}
+                    >
+                      <p className="text-sm font-medium leading-snug">{notification.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Horário do remédio: {notification.scheduledTime}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Alertado em: {notificationDateFormatter.format(new Date(notification.alertedAt))}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
         </header>
 
         <main className="flex-1 overflow-y-auto px-4 py-4">{children}</main>
