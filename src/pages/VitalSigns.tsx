@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Activity, Droplets, Plus, NotebookPen } from "lucide-react";
+import { Activity, Droplets, Plus, NotebookPen, Trash2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type VitalRecord = {
   id: string;
@@ -143,6 +142,9 @@ export default function VitalSigns() {
           <Button size="icon" variant="outline" aria-label="Editar último registro" onClick={() => history[0] && openEdit(history[0])}>
             <NotebookPen className="h-4 w-4" />
           </Button>
+          <Button size="icon" variant="outline" aria-label="Excluir último registro" onClick={() => history[0] && removeRecord(history[0].id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="icon" aria-label="Adicionar registro"><Plus className="h-4 w-4" /></Button>
@@ -229,8 +231,7 @@ export default function VitalSigns() {
           <div className="space-y-3">
             {history.length === 0 && <p className="text-sm text-muted-foreground">Nenhum registro cadastrado neste período.</p>}
             {history.map((v) => (
-              <SwipeToDeleteItem key={v.id} onDelete={() => removeRecord(v.id)} deleteLabel="Apagar registro de sinais vitais">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <div key={v.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                 <div className="text-sm"><p className="font-medium">{format(new Date(v.date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p><p className="text-xs text-muted-foreground">Por {v.recordedBy}</p></div>
                 <div className="flex items-center gap-3 text-sm">
                   <div className="text-center"><p className="font-semibold">{v.systolic}/{v.diastolic}</p><p className="text-xs text-muted-foreground">mmHg</p></div>
@@ -238,10 +239,10 @@ export default function VitalSigns() {
                   <div className="text-center"><p className="font-semibold">{v.temperature}°</p><p className="text-xs text-muted-foreground">°C</p></div>
                   <div className="text-center"><p className="font-semibold">{v.glucose}</p><p className="text-xs text-muted-foreground">mg/dL</p></div>
                   <Button size="icon" variant="outline" onClick={() => openEdit(v)} aria-label="Editar registro"><NotebookPen className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="outline" onClick={() => removeRecord(v.id)} aria-label="Excluir registro"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   {getStatusBadge(v.systolic, v.diastolic)}
                 </div>
               </div>
-            </SwipeToDeleteItem>
             ))}
           </div>
         </CardContent>

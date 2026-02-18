@@ -4,10 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Trash2 } from "lucide-react";
 import { ELDER_INFO_KEY, getAuthProfile } from "@/lib/auth";
 import { differenceInYears, isValid } from "date-fns";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type ElderInfoData = {
   schemaVersion?: number;
@@ -141,12 +140,14 @@ export default function ElderInfo() {
             </div>
           </DialogContent>
         </Dialog>
+        <Button size="icon" variant="outline" aria-label="Excluir dados manuais" onClick={clearManualFields}>
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
       </div>
 
-      <SwipeToDeleteItem onDelete={clearManualFields} deleteLabel="Limpar dados manuais do idoso">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
+      <Card>
+        <CardHeader><CardTitle className="text-base">Informações cadastrais</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm">
           <p><span className="font-medium">Nome:</span> {data.name || "-"}</p>
           <p><span className="font-medium">Idade:</span> {data.age || "-"}</p>
           <p><span className="font-medium">Sexo:</span> {data.sex || "-"}</p>
@@ -155,9 +156,8 @@ export default function ElderInfo() {
           <p><span className="font-medium">Telefone:</span> {data.phone || "-"}</p>
           <p><span className="font-medium">Data de nascimento:</span> {data.birthDate || "-"}</p>
           <p><span className="font-medium">Endereço:</span> {data.address || "-"}</p>
-          </CardContent>
-        </Card>
-      </SwipeToDeleteItem>
+        </CardContent>
+      </Card>
     </div>
   );
 }

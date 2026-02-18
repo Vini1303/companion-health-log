@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Phone, Ambulance, Shield, Flame, UserRound, Plus, NotebookPen } from "lucide-react";
+import { Phone, Ambulance, Shield, Flame, UserRound, Plus, NotebookPen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Contact = {
   id: string;
@@ -135,9 +134,8 @@ export default function Contacts() {
 
       <div className="space-y-3">
         {filtered.map((contact) => (
-          <SwipeToDeleteItem key={contact.id} onDelete={() => removeContact(contact.id)} deleteLabel={`Apagar contato ${contact.name}`}>
-            <Card>
-              <CardContent className="p-4 flex items-center justify-between gap-2">
+          <Card key={contact.id}>
+            <CardContent className="p-4 flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <IconByType type={contact.icon} />
@@ -159,6 +157,9 @@ export default function Contacts() {
                 >
                   <NotebookPen className="h-4 w-4" />
                 </Button>
+                <Button size="icon" variant="outline" aria-label="Excluir contato" onClick={() => removeContact(contact.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
                 <a
                   href={`tel:${contact.number.replace(/[^\d+]/g, "")}`}
                   className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm hover:bg-accent"
@@ -166,9 +167,8 @@ export default function Contacts() {
                   <Phone className="h-4 w-4" /> Ligar
                 </a>
               </div>
-              </CardContent>
-            </Card>
-          </SwipeToDeleteItem>
+            </CardContent>
+          </Card>
         ))}
       </div>
 

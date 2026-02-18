@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Pill, Plus, Clock, Check, NotebookPen } from "lucide-react";
+import { Pill, Plus, Clock, Check, NotebookPen, Trash2 } from "lucide-react";
 import { MEDICATIONS_STORAGE_KEY } from "@/lib/storage-keys";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Medication = {
   id: string;
@@ -104,6 +103,9 @@ export default function Medications() {
           <Button size="icon" variant="outline" aria-label="Editar medicamento" onClick={() => medList[0] && openEdit(medList[0])}>
             <NotebookPen className="h-4 w-4" />
           </Button>
+          <Button size="icon" variant="outline" aria-label="Excluir medicamento" onClick={() => medList[0] && removeMedication(medList[0].id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="icon" aria-label="Adicionar medicamento"><Plus className="h-4 w-4" /></Button>
@@ -132,7 +134,7 @@ export default function Medications() {
           {medList.map((med) => {
             const taken = takenSet.has(med.id);
             return (
-              <SwipeToDeleteItem key={med.id} onDelete={() => removeMedication(med.id)} deleteLabel={`Apagar ${med.name}`}>
+              <div key={med.id}>
                 <div className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${taken ? "bg-success/5 border-success/20" : "bg-card border-border"}`}>
                 <div className="flex items-center gap-4">
                   <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${taken ? "bg-success/10" : "bg-primary/10"}`}>
@@ -149,10 +151,11 @@ export default function Medications() {
                     <Badge variant="outline" className="text-xs mt-1">{med.frequency}</Badge>
                   </div>
                   <Button size="icon" variant="outline" onClick={() => openEdit(med)} aria-label="Editar medicamento"><NotebookPen className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="outline" onClick={() => removeMedication(med.id)} aria-label="Excluir medicamento"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   <Button size="sm" variant={taken ? "outline" : "default"} className={!taken ? "bg-success hover:bg-success/90 text-success-foreground" : ""} onClick={() => toggleTaken(med.id)}><Check className="h-4 w-4" /></Button>
                 </div>
               </div>
-            </SwipeToDeleteItem>
+            </div>
             );
           })}
         </CardContent>

@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FlaskConical, Plus, Calendar, User, ExternalLink, NotebookPen } from "lucide-react";
+import { FlaskConical, Plus, Calendar, User, ExternalLink, NotebookPen, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 import { ptBR } from "date-fns/locale";
 
 type Exam = {
@@ -90,6 +89,9 @@ export default function Exams() {
           <Button size="icon" variant="outline" aria-label="Editar exame" onClick={() => examList[0] && openEdit(examList[0])}>
             <NotebookPen className="h-4 w-4" />
           </Button>
+          <Button size="icon" variant="outline" aria-label="Excluir exame" onClick={() => examList[0] && removeExam(examList[0].id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="icon" aria-label="Adicionar exame"><Plus className="h-4 w-4" /></Button>
@@ -116,9 +118,8 @@ export default function Exams() {
         {examList.map((exam) => {
           const status = statusMap[exam.status];
           return (
-            <SwipeToDeleteItem key={exam.id} onDelete={() => removeExam(exam.id)} deleteLabel={`Apagar exame ${exam.type}`}>
-              <Card>
-                <CardContent className="p-4">
+            <Card key={exam.id}>
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center"><FlaskConical className="h-5 w-5 text-accent" /></div>
@@ -133,6 +134,7 @@ export default function Exams() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button size="icon" variant="outline" aria-label="Editar exame" onClick={() => openEdit(exam)}><NotebookPen className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" aria-label="Excluir exame" onClick={() => removeExam(exam.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     <Badge className={status.className}>{status.label}</Badge>
                     {exam.resultUrl && (
                       <Button asChild size="sm" variant="outline">
@@ -141,9 +143,8 @@ export default function Exams() {
                     )}
                   </div>
                 </div>
-                </CardContent>
-              </Card>
-            </SwipeToDeleteItem>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

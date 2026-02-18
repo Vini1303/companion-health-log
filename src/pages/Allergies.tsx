@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertTriangle, Plus, ShieldAlert, NotebookPen } from "lucide-react";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
+import { AlertTriangle, Plus, ShieldAlert, NotebookPen, Trash2 } from "lucide-react";
 
 type Allergy = {
   id: string;
@@ -95,6 +94,9 @@ export default function Allergies() {
           <Button size="icon" variant="outline" aria-label="Editar alergia" onClick={() => allergies[0] && openEdit(allergies[0])}>
             <NotebookPen className="h-4 w-4" />
           </Button>
+          <Button size="icon" variant="outline" aria-label="Excluir alergia" onClick={() => allergies[0] && removeAllergy(allergies[0].id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button size="icon" aria-label="Adicionar alergia"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>
@@ -131,9 +133,8 @@ export default function Allergies() {
         {allergies.map((allergy) => {
           const severity = severityMap[allergy.severity];
           return (
-            <SwipeToDeleteItem key={allergy.id} onDelete={() => removeAllergy(allergy.id)} deleteLabel={`Apagar alergia ${allergy.name}`}>
-              <Card className={allergy.severity === "alta" ? "border-destructive/20" : ""}>
-                <CardContent className="p-4">
+            <Card key={allergy.id} className={allergy.severity === "alta" ? "border-destructive/20" : ""}>
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${allergy.severity === "alta" ? "bg-destructive/10" : "bg-warning/10"}`}>
@@ -147,15 +148,15 @@ export default function Allergies() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button size="icon" variant="outline" aria-label="Editar alergia" onClick={() => openEdit(allergy)}><NotebookPen className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" aria-label="Excluir alergia" onClick={() => removeAllergy(allergy.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     <div className="flex flex-col items-end gap-1">
                       <Badge className={severity.className}>{severity.label}</Badge>
                       <Badge variant="outline" className="text-xs">{typeMap[allergy.type]}</Badge>
                     </div>
                   </div>
                 </div>
-                </CardContent>
-              </Card>
-            </SwipeToDeleteItem>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

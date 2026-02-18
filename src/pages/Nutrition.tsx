@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Apple, Clock, AlertTriangle, UtensilsCrossed, Plus, NotebookPen } from "lucide-react";
+import { Apple, Clock, AlertTriangle, UtensilsCrossed, Plus, NotebookPen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SwipeToDeleteItem } from "@/components/SwipeToDeleteItem";
 
 type Meal = { meal: string; time: string; description: string };
 type NutritionData = { restrictions: string[]; plan: Meal[]; notes: string };
@@ -68,6 +67,7 @@ export default function Nutrition() {
         </div>
         <div className="flex items-center gap-2">
           <Button size="icon" variant="outline" aria-label="Editar refeição" onClick={() => data.plan[0] && openEdit(data.plan[0])}><NotebookPen className="h-4 w-4" /></Button>
+          <Button size="icon" variant="outline" aria-label="Excluir refeição" onClick={() => data.plan[0] && removeMeal(data.plan[0])}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button size="icon" aria-label="Adicionar refeição"><Plus className="h-4 w-4" /></Button></DialogTrigger>
             <DialogContent>
@@ -95,8 +95,7 @@ export default function Nutrition() {
         <CardContent className="space-y-3">
           {data.plan.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma refeição cadastrada.</p>}
           {data.plan.map((meal, i) => (
-            <SwipeToDeleteItem key={`${meal.meal}-${meal.time}-${i}`} onDelete={() => removeMeal(meal)} deleteLabel={`Apagar refeição ${meal.meal}`}>
-              <div className="flex items-start gap-4 p-3 rounded-lg bg-muted/50">
+            <div key={`${meal.meal}-${meal.time}-${i}`} className="flex items-start gap-4 p-3 rounded-lg bg-muted/50">
               <div className="h-10 w-10 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0"><Apple className="h-5 w-5 text-secondary" /></div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -105,9 +104,9 @@ export default function Nutrition() {
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{meal.description}</p>
               </div>
-                <Button size="icon" variant="outline" aria-label="Editar refeição" onClick={() => openEdit(meal)}><NotebookPen className="h-4 w-4" /></Button>
-              </div>
-            </SwipeToDeleteItem>
+              <Button size="icon" variant="outline" aria-label="Editar refeição" onClick={() => openEdit(meal)}><NotebookPen className="h-4 w-4" /></Button>
+              <Button size="icon" variant="outline" aria-label="Excluir refeição" onClick={() => removeMeal(meal)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+            </div>
           ))}
         </CardContent>
       </Card>
