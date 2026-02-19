@@ -5,6 +5,42 @@ export const AUTH_PROFILE_KEY = "care:auth:profile";
 export const AUTH_DB_KEY = "care:auth:db";
 export const ELDER_INFO_KEY = "care:elder-info";
 
+export type AuthRole = "caregiver" | "elder";
+
+export type AuthPermission =
+  | "dashboard:read"
+  | "vitals:read"
+  | "medications:read"
+  | "exams:read"
+  | "allergies:read"
+  | "contacts:read"
+  | "elder-info:read"
+  | "nutrition:read"
+  | "profile:read";
+
+const ROLE_PERMISSIONS: Record<AuthRole, AuthPermission[]> = {
+  caregiver: [
+    "dashboard:read",
+    "vitals:read",
+    "medications:read",
+    "exams:read",
+    "allergies:read",
+    "contacts:read",
+    "elder-info:read",
+    "nutrition:read",
+    "profile:read",
+  ],
+  elder: [
+    "dashboard:read",
+    "vitals:read",
+    "medications:read",
+    "exams:read",
+    "allergies:read",
+    "nutrition:read",
+    "profile:read",
+  ],
+};
+
 export type AuthProfile = {
   elderName: string;
   birthDate: string;
@@ -16,10 +52,29 @@ type AuthUser = {
   password: string;
   elderName: string;
   caregiverName?: string;
+  role: AuthRole;
+  permissions: AuthPermission[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+type LoginEvent = {
+  username: string;
+  status: "success" | "failure";
+  timestamp: string;
 };
 
 type AuthDatabase = {
   users: AuthUser[];
+  loginEvents: LoginEvent[];
+};
+
+export type AuthSession = {
+  isAuthenticated: boolean;
+  username: string;
+  role: AuthRole;
+  permissions: AuthPermission[];
+  loginAt: string;
 };
 
 export function nameToUsername(name: string) {
@@ -55,10 +110,30 @@ export function birthDateToPassword(birthDate: string) {
   return digits;
 }
 
+function migrateUser(user: Partial<AuthUser>): AuthUser {
+  const role: AuthRole = user.role || "caregiver";
+  const now = new Date().toISOString();
+  return {
+    username: user.username || "",
+    password: user.password || "",
+    elderName: user.elderName || "",
+    caregiverName: user.caregiverName,
+    role,
+    permissions: user.permissions?.length ? user.permissions : ROLE_PERMISSIONS[role],
+    createdAt: user.createdAt || now,
+    updatedAt: user.updatedAt || now,
+  };
+}
+
 function readAuthDatabase(): AuthDatabase {
   const saved = localStorage.getItem(AUTH_DB_KEY);
-  if (saved) return JSON.parse(saved) as AuthDatabase;
-  return { users: [] };
+  if (!saved) return { users: [], loginEvents: [] };
+
+  const parsed = JSON.parse(saved) as Partial<AuthDatabase>;
+  return {
+    users: (parsed.users || []).map((user) => migrateUser(user)),
+    loginEvents: parsed.loginEvents || [],
+  };
 }
 
 function writeAuthDatabase(db: AuthDatabase) {
@@ -103,11 +178,23 @@ export function upsertUserFromProfile(profile: AuthProfile) {
 
   const db = readAuthDatabase();
   const index = db.users.findIndex((u) => u.username === username);
+  const now = new Date().toISOString();
+
+  const nextUser: AuthUser = {
+    username,
+    password,
+    elderName: profile.elderName,
+    caregiverName: profile.caregiverName,
+    role: "caregiver",
+    permissions: ROLE_PERMISSIONS.caregiver,
+    createdAt: index >= 0 ? db.users[index].createdAt : now,
+    updatedAt: now,
+  };
 
   if (index >= 0) {
-    db.users[index] = { username, password, elderName: profile.elderName, caregiverName: profile.caregiverName };
+    db.users[index] = nextUser;
   } else {
-    db.users.push({ username, password, elderName: profile.elderName, caregiverName: profile.caregiverName });
+    db.users.push(nextUser);
   }
 
   writeAuthDatabase(db);
@@ -127,13 +214,63 @@ export function createUser(profile: AuthProfile) {
   return upsertUserFromProfile(profile);
 }
 
-export function validateUserCredentials(username: string, password: string) {
+function recordLoginEvent(username: string, status: "success" | "failure") {
   const db = readAuthDatabase();
-  return db.users.some(
-    (user) => user.username === username.trim().toLowerCase() && user.password === password.replace(/\D/g, ""),
-  );
+  db.loginEvents.push({ username, status, timestamp: new Date().toISOString() });
+  db.loginEvents = db.loginEvents.slice(-100);
+  writeAuthDatabase(db);
 }
 
+export function authenticateUser(username: string, password: string): AuthSession | null {
+  const normalizedUsername = username.trim().toLowerCase();
+  const normalizedPassword = password.replace(/\D/g, "");
+  const db = readAuthDatabase();
+  const matched = db.users.find(
+    (user) => user.username === normalizedUsername && user.password === normalizedPassword,
+  );
+
+  if (!matched) {
+    recordLoginEvent(normalizedUsername || "unknown", "failure");
+    return null;
+  }
+
+  const session: AuthSession = {
+    isAuthenticated: true,
+    username: matched.username,
+    role: matched.role,
+    permissions: matched.permissions,
+    loginAt: new Date().toISOString(),
+  };
+
+  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+  recordLoginEvent(matched.username, "success");
+  return session;
+}
+
+export function getAuthSession(): AuthSession | null {
+  const saved = localStorage.getItem(AUTH_SESSION_KEY);
+  if (!saved) return null;
+
+  try {
+    const session = JSON.parse(saved) as AuthSession;
+    if (!session.isAuthenticated) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+export function clearAuthSession() {
+  localStorage.removeItem(AUTH_SESSION_KEY);
+}
+
+export function hasPermission(session: AuthSession | null, permission: AuthPermission) {
+  return !!session?.permissions.includes(permission);
+}
+
+export function validateUserCredentials(username: string, password: string) {
+  return authenticateUser(username, password) !== null;
+}
 
 export function getDashboardNames() {
   const profile = getAuthProfile();
