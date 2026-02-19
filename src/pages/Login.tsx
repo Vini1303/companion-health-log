@@ -12,7 +12,7 @@ import {
   ensureDefaultUser,
   getAuthProfile,
   nameToUsername,
-  validateUserCredentials,
+  authenticateUser,
 } from "@/lib/auth";
 
 type LoginProps = {
@@ -39,7 +39,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   }, []);
 
   const handleLogin = () => {
-    if (validateUserCredentials(username, password)) {
+    const session = authenticateUser(username, password);
+    if (session) {
       onLoginSuccess();
       return;
     }
